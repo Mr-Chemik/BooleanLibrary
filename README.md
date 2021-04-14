@@ -2,6 +2,7 @@
 A C++ library to help you work with Boolean algebra.
 
 (EN) Instruction for use:
+
 All unique (used at least once) variables must be in alphabetical order.
 
 '()' - open and close brackets
@@ -39,7 +40,8 @@ Boolean::result(string str)- returning only the result of the truth table (retur
 Библиотека для помощи в работе с булевой алгеброй.
 
 (RU) Инструкция по применению:
-Все уникальные (содержащиеся в единой экземпляре) переменные должны быть в алфавитном порядке.
+
+Все уникальные (содержащиеся в едином экземпляре) переменные должны быть в алфавитном порядке.
 
 '()' - открывающая и закрывающая скобка
 
