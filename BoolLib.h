@@ -22,7 +22,7 @@ private:
 
 	static std::vector <std::vector<std::string>> build_simply_table(std::string str, std::string sorting);
 	static std::vector <std::string> sort_table(std::vector <std::vector<std::string>> table);
-	static std::string simplifing(std::vector <std::string> sorted_table, std::string sorting);
+	static std::string simplifing(std::vector <std::string> sorted_table, std::string sorting, std::string str);
 };
 
 std::vector <std::vector<int>> Boolean::build_table(std::string str, std::string sorting) {
@@ -361,7 +361,7 @@ std::string Boolean::solving_expression(std::string str) {
 	return str;
 }
 
-std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::string sorting) {
+std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::string sorting, std::string str) {
 	// Simplifying the expression Quine's method.
 	// Упрощение выражение методом Куайна
 
@@ -503,6 +503,7 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 		}
 	}
 
+
 	// Transformation of expression into a normal form.
 	// Трансофрмация выражения в нормальную форму.
 
@@ -523,6 +524,113 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 	}
 
 	first_str.erase(first_str.length() - 1);
+
+	// Checking the expression for errors.
+	// Проверка выражения на ошибки.
+
+	std::string sort = Boolean::check_order(first_str);
+	std::string help;
+
+	second_str = first_str;
+
+	for (int i = 0; i < sort.length(); i++) {
+		help = char(65 + i);
+		second_str.replace(second_str.find(sort[i]), 1, help);
+	}
+
+	std::vector <std::vector<int>> symp_table = Boolean::truth_table(second_str);
+	std::vector <std::vector<int>> str_table = Boolean::truth_table(str);
+	std::vector <int> id_num;
+
+	for (int i = 0; i < sort.length(); i++)
+		id_num.push_back(sort[i] - 65);
+
+	int comp = 0;
+	bool problem = false;
+	bool exit = false;
+
+	for (int j = 0; j < str_table.size(); j++) {
+		for (int k = 0; k < symp_table.size(); k++) {
+			for (int i = 0; i < id_num.size(); i++) {
+				if (symp_table[k][i] == str_table[j][id_num[i]])
+					comp++;
+			}
+			if (comp != Boolean::check_order(first_str).length())
+				comp = 0;
+			else {
+				if (symp_table[k][symp_table[0].size() - 1] != str_table[j][str_table[0].size() - 1])
+					problem = true;
+				comp = 0;
+			}
+		}
+	}
+
+	// Fixing errors
+    // Исправление ошибок
+
+	while (problem) {
+		exit = false;
+		id_num.clear();
+
+		first_str.push_back('+');
+		for (int i = 1; i < MATRIX_Y; i++) {
+			if (impl_matrix[i][0] != "NULL") {
+				first_str = first_str + impl_matrix[i][0] + "+";
+				impl_matrix[i][0] = "NULL";
+				break;
+			}
+		}
+
+		for (int i = 0; i < first_str.length(); i++) {
+			if (first_str[i] > 96) {
+				combo = (first_str[i] - 32);
+				second_str = "!";
+				first_str.replace(first_str.find(first_str[i]), 1, second_str + combo);
+			}
+		}
+
+		for (int i = 0; i < first_str.length() - 1; i++) {
+			if ((first_str[i] >= 65 && first_str[i] <= 90) && (first_str[i + 1] == '!' || (first_str[i + 1] >= 65 && first_str[i + 1] <= 90)))
+				first_str.insert(i + 1, "*");
+		}
+
+		first_str.erase(first_str.length() - 1);
+
+		second_str = first_str;
+
+		for (int i = 0; i < sort.length(); i++) {
+			help = char(65 + i);
+			second_str.replace(second_str.find(sort[i]), 1, help);
+		}
+
+		symp_table = Boolean::truth_table(second_str);
+		str_table = Boolean::truth_table(str);
+
+		for (int i = 0; i < sort.length(); i++)
+			id_num.push_back(sort[i] - 65);
+
+
+		for (int j = 0; j < str_table.size(); j++) {
+			for (int k = 0; k < symp_table.size(); k++) {
+				for (int i = 0; i < id_num.size(); i++) {
+					if (symp_table[k][i] == str_table[j][id_num[i]])
+						comp++;
+				}
+				if (comp != Boolean::check_order(first_str).length())
+					comp = 0;
+				else {
+					if (symp_table[k][symp_table[0].size() - 1] != str_table[j][str_table[0].size() - 1]) {
+						problem = true;
+						exit = true;
+					}
+					comp = 0;
+				}
+			}
+			if (j == str_table.size() - 1 && exit == false)
+				problem = false;
+		}
+	}
+
 
 	return first_str;
 }
@@ -630,12 +738,16 @@ bool Boolean::checking_expression(std::string str) {
 	}
 
 	for (int i = 0; i < str.length() - 1; i++) {
-		if ((str[i] >= 65 && str[i] <= 90) && ((str[i + 1] != '+' && str[i + 1] != '|' && str[i + 1] != '*' && str[i + 1] != '#' && str[i + 1] != '=' && str[i + 1] != '>' && str[i + 1] != '^' && str[i + 1] != ')')))
+		if ((str[i] >= 65 && str[i] <= 90) && ((str[i + 1] != '+' && str[i + 1] != '|' && str[i + 1] != '*' && str[i + 1] != '#' && str[i + 1] != '=' && str[i + 1] != '>' && str[i + 1] != '^' && str[i + 1] != ')'))) {
 			return false;
-		if (str[i] == '(' && (!(str[i + 1] >= 65 && str[i + 1] <= 90) && str[i + 1] != '!' && str[i + 1] != '('))
+		}
+		if (str[i] == '(' && (!(str[i + 1] >= 65 && str[i + 1] <= 90) && str[i + 1] != '!' && str[i + 1] != '(')) {
 			return false;
-		if ((!(str[i] >= 65 && str[i] <= 90) && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i + 1] >= 65 && str[i + 1] <= 90) && str[i + 1] != '(' && str[i + 1] != ')' && str[i + 1] != '!'))
+		}
+	
+		if ((!(str[i] >= 65 && str[i] <= 90) && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i + 1] >= 65 && str[i + 1] <= 90) && str[i + 1] != '(' && str[i + 1] != ')' && str[i + 1] != '!')) {
 			return false;
+		}
 	}
 
 	return true;
@@ -654,7 +766,7 @@ std::string Boolean::simplify(const std::string str) {
 	// Error in the expression
 	// Ошибка в выражении
 
-	return simplifing(sort_table(build_simply_table(str, check_order(str))), check_order(str));
+	return simplifing(sort_table(build_simply_table(str, check_order(str))), check_order(str), str);
 }
 
 std::vector <std::vector<int>> Boolean::truth_table(const std::string str) {
@@ -689,3 +801,4 @@ std::vector <int> Boolean::result(const std::string str) {
 
 	return table_result;
 }
+
