@@ -36,6 +36,11 @@ Boolean::truth_table(string str) - building a truth table based on a given expre
 
 Boolean::result(string str)- returning only the result of the truth table (return data - vector< int >)
 
+Exsample of simplifying:
+Input: A>B+(!A*C)+D
+
+Output: !A+D+B
+
 
 Библиотека для помощи в работе с булевой алгеброй.
 
@@ -72,3 +77,8 @@ Boolean::simlplify(string str) - упрощение булевого выраж�
 Boolean::truth_table(string str) - построение таблицы истинности по заданному выражению (возвращаемые данные - vector<vector < int > >)
 
 Boolean::result(string str)- возврат только результата таблицы истинности (возвращаемые данные - vector< int >)
+
+Пример упрощения:
+Вход: A>B+(!A*C)+D
+
+Выход: !A+D+B
