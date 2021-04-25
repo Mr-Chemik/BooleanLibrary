@@ -6,26 +6,26 @@
 
 class Boolean {
 public:
-	static std::vector <std::vector<int>> truth_table(const std::string str);
-	static std::vector <int> result(const std::string str);
+	static std::vector <std::vector<bool>> truth_table(const std::string str);
+	static std::vector <bool> result(const std::string str);
 	static std::string simplify(const std::string str);
 
 private:
-	#define MATRIX_X sorted_table.size() / 2 + 1
-	#define MATRIX_Y pdnf_sorted_table.size() + 1
+#define MATRIX_X sorted_table.size() / 2 + 1
+#define MATRIX_Y pdnf_sorted_table.size() + 1
 
 	static bool checking_expression(std::string str);
 	static std::string check_order(std::string str);
 	static std::string solving_expression(std::string str);
 	static std::string searching_bracket(std::string str, std::vector <int> value);
-	static std::vector <std::vector<int>> build_table(std::string str, std::string sorting);
+	static std::vector <std::vector<bool>> build_table(std::string str, std::string sorting);
 
 	static std::vector <std::vector<std::string>> build_simply_table(std::string str, std::string sorting);
 	static std::vector <std::string> sort_table(std::vector <std::vector<std::string>> table);
 	static std::string simplifing(std::vector <std::string> sorted_table, std::string sorting, std::string str);
 };
 
-std::vector <std::vector<int>> Boolean::build_table(std::string str, std::string sorting) {
+std::vector <std::vector<bool>> Boolean::build_table(std::string str, std::string sorting) {
 	// Building a truth table by int
 	// Строит таблицу истинности из целочисленных переменных
 	int x;
@@ -40,7 +40,7 @@ std::vector <std::vector<int>> Boolean::build_table(std::string str, std::string
 
 	x = x + 1;
 
-	std::vector < std::vector <int>> table(y);
+	std::vector < std::vector <bool>> table(y);
 
 	for (int i = 0; i < y; i++)
 		table[i].resize(x);
@@ -538,8 +538,8 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 		second_str.replace(second_str.find(sort[i]), 1, help);
 	}
 
-	std::vector <std::vector<int>> symp_table = Boolean::truth_table(second_str);
-	std::vector <std::vector<int>> str_table = Boolean::truth_table(str);
+	std::vector <std::vector<bool>> symp_table = Boolean::truth_table(second_str);
+	std::vector <std::vector<bool>> str_table = Boolean::truth_table(str);
 	std::vector <int> id_num;
 
 	for (int i = 0; i < sort.length(); i++)
@@ -566,7 +566,7 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 	}
 
 	// Fixing errors
-    // Исправление ошибок
+	// Исправление ошибок
 
 	while (problem) {
 		exit = false;
@@ -744,7 +744,7 @@ bool Boolean::checking_expression(std::string str) {
 		if (str[i] == '(' && (!(str[i + 1] >= 65 && str[i + 1] <= 90) && str[i + 1] != '!' && str[i + 1] != '(')) {
 			return false;
 		}
-	
+
 		if ((!(str[i] >= 65 && str[i] <= 90) && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i + 1] >= 65 && str[i + 1] <= 90) && str[i + 1] != '(' && str[i + 1] != ')' && str[i + 1] != '!')) {
 			return false;
 		}
@@ -769,7 +769,7 @@ std::string Boolean::simplify(const std::string str) {
 	return simplifing(sort_table(build_simply_table(str, check_order(str))), check_order(str), str);
 }
 
-std::vector <std::vector<int>> Boolean::truth_table(const std::string str) {
+std::vector <std::vector<bool>> Boolean::truth_table(const std::string str) {
 	// Return the truth table in the vector type
 	// Возврат таблицы истинности в типе vector
 
@@ -782,7 +782,7 @@ std::vector <std::vector<int>> Boolean::truth_table(const std::string str) {
 	return Boolean::build_table(str, Boolean::check_order(str));
 }
 
-std::vector <int> Boolean::result(const std::string str) {
+std::vector <bool> Boolean::result(const std::string str) {
 	// Return only result of logical expression
 	// Возврат только результата логического выражения
 
@@ -792,13 +792,12 @@ std::vector <int> Boolean::result(const std::string str) {
 	// Error in the expression
 	// Ошибка в выражении
 
-	std::vector <std::vector<int>> table = Boolean::truth_table(str);
+	std::vector <std::vector<bool>> table = Boolean::truth_table(str);
 
-	std::vector <int> table_result;
+	std::vector <bool> table_result;
 
 	for (int i = 0; i < table.size(); i++)
 		table_result.push_back(table[i][table[1].size() - 1]);
 
 	return table_result;
 }
-
