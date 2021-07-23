@@ -32,9 +32,9 @@ List of method:
 
 Boolean::simlplify(string str) - simplifying a boolean expression (return data - string)
 
-Boolean::truth_table(string str) - building a truth table based on a given expression (return data - vector<vector < int > >)
+Boolean::truth_table(string str) - building a truth table based on a given expression (return data - vector<vector < bool > >)
 
-Boolean::result(string str)- returning only the result of the truth table (return data - vector< int >)
+Boolean::result(string str)- returning only the result of the truth table (return data - vector< bool >)
 
 Exsample of simplifying:
 Input: A>B+(!A*C)+D
@@ -74,9 +74,9 @@ Output: !A+D+B
 
 Boolean::simlplify(string str) - упрощение булевого выражения (возвращаемые данные - string)
 
-Boolean::truth_table(string str) - построение таблицы истинности по заданному выражению (возвращаемые данные - vector<vector < int > >)
+Boolean::truth_table(string str) - построение таблицы истинности по заданному выражению (возвращаемые данные - vector<vector < bool > >)
 
-Boolean::result(string str)- возврат только результата таблицы истинности (возвращаемые данные - vector< int >)
+Boolean::result(string str)- возврат только результата таблицы истинности (возвращаемые данные - vector< bool >)
 
 Пример упрощения:
 Вход: A>B+(!A*C)+D
