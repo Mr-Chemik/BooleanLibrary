@@ -760,7 +760,7 @@ std::string Boolean::simplify(const std::string str) {
 	// Возврат упрощенного выражения 
 
 	if (!checking_expression(str))
-		throw - 1;
+		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
@@ -773,7 +773,7 @@ std::vector <std::vector<bool>> Boolean::truth_table(const std::string str) {
 	// Возврат таблицы истинности в типе vector
 
 	if (!checking_expression(str))
-		throw - 1;
+		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
@@ -786,7 +786,7 @@ std::vector <bool> Boolean::result(const std::string str) {
 	// Возврат только результата логического выражения
 
 	if (!checking_expression(str))
-		throw - 1;
+		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
