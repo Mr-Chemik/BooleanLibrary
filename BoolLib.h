@@ -1,3 +1,7 @@
+#pragma once
+#ifndef _BOOLLIB_H_
+#define _BOOLLIB_H_
+
 #include <vector>
 #include <string>
 #include <cmath>
@@ -800,3 +804,5 @@ std::vector <bool> Boolean::result(const std::string str) {
 
 	return table_result;
 }
+
+#endif;
