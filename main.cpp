@@ -5,7 +5,7 @@
 
 int main() {
 
-	std::string input = "!((!A*B)>!(C+B))";
+	std::string input = "A>(B*C+D^E*(A+E))";
 
 	std::vector <std::vector<bool>> vec = Boolean::truth_table(input);
 
@@ -19,8 +19,11 @@ int main() {
 
 	// Return the truth table in the vector type
 
-	std::cout << std::endl << Boolean::simplify(input);
+	std::cout << std::endl << "Simplify: " << Boolean::simplify(input) << std::endl;
 
 	// Return simplified expression
 
+	std::cout << std::endl << "Zhegalkin polynomial: " << Boolean::polynom(input);
+
+	// Return Zhegalkin polynomial
 }
