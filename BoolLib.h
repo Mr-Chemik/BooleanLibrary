@@ -9,6 +9,7 @@
 
 class Boolean {
 public:
+	static std::string polynom(const std::string);
 	static std::vector <std::vector<bool>> truth_table(const std::string str);
 	static std::vector <bool> result(const std::string str);
 	static std::string simplify(const std::string str);
@@ -17,6 +18,7 @@ private:
 #define MATRIX_X sorted_table.size() / 2 + 1
 #define MATRIX_Y pdnf_sorted_table.size() + 1
 
+	static std::string zhegalkin(std::string str);
 	static bool checking_expression(std::string str);
 	static std::string check_order(std::string str);
 	static std::string solving_expression(std::string str);
@@ -756,8 +758,80 @@ bool Boolean::checking_expression(std::string str) {
 	return true;
 }
 
+std::string Boolean::zhegalkin(std::string str) {
+
+	std::vector <bool> res = Boolean::result(str);
+
+	int size_of_result = res.size();
+
+	bool** triangle = new bool*[size_of_result];
+
+
+	for (int i = 0; i < size_of_result; i++) {
+		triangle[i] = new bool[size_of_result - i];
+
+		triangle[0][i] = res[i];
+	}
+
+	for (int i = 0; i < size_of_result; i++) {
+		for (int j = 0; j < size_of_result - 1 - i; j++) {
+			triangle[i + 1][j] = triangle[i][j] xor triangle[i][j + 1];
+		}
+	}
+
+
+	std::vector <std::vector<bool>> table = Boolean::build_table(str, check_order(str));
+
+	for (int i = 0; i < table.size(); i++) {
+		table[i][table[i].size() - 1] = triangle[i][0];
+	}
+
+	for (int i = 0; i < size_of_result; i++)
+		delete[] triangle[i];
+
+	delete[] triangle;
+
+	
+	std::string pol = "";
+
+	for (int i = 0; i < table.size(); i++) {
+
+
+		for (int j = 0; j < table[i].size() - 1; j++) {
+
+			if (i == 0 && table[i][table[i].size() - 1] == 1) {
+				pol = pol + "1";
+				break;
+			}
+
+			if (table[i][table[i].size() - 1] == 1) {
+				
+				if (table[i][j] == 1)
+					pol = pol + char('A' + j);
+			}
+
+		}
+
+		if (table[i][table[i].size() - 1] == 1)
+			pol = pol + '^';
+		
+	}
+
+	pol.pop_back();
+
+	return pol;
+
+}
+
 // Visible method.
 // Видимые методы.
+
+std::string Boolean::polynom(const std::string str) {
+	if (!checking_expression(str))
+		throw std::exception("Error in the expression");
+
+	return zhegalkin(str);
+}
 
 std::string Boolean::simplify(const std::string str) {
 	// Return simplified expression
