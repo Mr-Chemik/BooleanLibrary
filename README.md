@@ -3,7 +3,7 @@ A C++ library to help you work with Boolean algebra.
 
 (EN) Instruction for use:
 
-All unique (used at least once) variables must be in alphabetical order and in uppercase.
+All unique (used at least once) variables must be in alphabetical order and in uppercase or x0, x1, x2...
 
 '()' - open and close brackets
 
@@ -36,17 +36,19 @@ Boolean::truth_table(string str) - building a truth table based on a given expre
 
 Boolean::result(string str)- returning only the result of the truth table (return data - vector< bool >)
 
-Exsample of simplifying:
-Input: A>B+(!A*C)+D
+Boolean::polynom(string str) - return of the Zhegalkin polynomial by a given expression (return data - string)
 
-Output: !A+D+B
+Exsample of simplifying:
+Input: A>B+(!A*C)+D  x0>x1+(!x0*x2)+x3
+
+Output: !A+D+B  !x0+x3+x1
 
 
 Библиотека для помощи в работе с булевой алгеброй.
 
 (RU) Инструкция по применению:
 
-Все уникальные (содержащиеся в едином экземпляре) переменные должны быть в алфавитном порядке и в верхнем регистре.
+Все уникальные (содержащиеся в едином экземпляре) переменные должны быть в алфавитном порядке и в верхнем регистре или x0, x1, x2...
 
 '()' - открывающая и закрывающая скобка
 
@@ -78,7 +80,9 @@ Boolean::truth_table(string str) - построение таблицы исти�
 
 Boolean::result(string str)- возврат только результата таблицы истинности (возвращаемые данные - vector< bool >)
 
-Пример упрощения:
-Вход: A>B+(!A*C)+D
+Boolean::polynom(string str) - возврат полинома Жегалкина по зданному выражению (возвращаемы данные - string)
 
-Выход: !A+D+B
+Пример упрощения:
+Вход: A>B+(!A*C)+D  x0>x1+(!x0*x2)+x3
+
+Выход: !A+D+B  !x0+x3+x1
