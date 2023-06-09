@@ -6,6 +6,7 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <regex>
 
 class Boolean {
 public:
@@ -24,6 +25,9 @@ private:
 	static std::string solving_expression(std::string str);
 	static std::string searching_bracket(std::string str, std::vector <int> value);
 	static std::vector <std::vector<bool>> build_table(std::string str, std::string sorting);
+	static std::string change_x(std::string str);
+	static std::string change_a(std::string str);
+	static bool is_x(std::string str);
 
 	static std::vector <std::vector<std::string>> build_simply_table(std::string str, std::string sorting);
 	static std::vector <std::string> sort_table(std::vector <std::vector<std::string>> table);
@@ -760,12 +764,18 @@ bool Boolean::checking_expression(std::string str) {
 
 std::string Boolean::zhegalkin(std::string str) {
 
+	// Creating the Zhegalkin polynomial by the triangle method
+	// Создание полинома Жегалкина методом треугольника
+
 	std::vector <bool> res = Boolean::result(str);
 
 	int size_of_result = res.size();
 
-	bool** triangle = new bool*[size_of_result];
 
+	// Initializing and filling pascal's triangle
+	// Инициализация и заполнение треугольника Паскаля
+
+	bool** triangle = new bool*[size_of_result];
 
 	for (int i = 0; i < size_of_result; i++) {
 		triangle[i] = new bool[size_of_result - i];
@@ -792,6 +802,9 @@ std::string Boolean::zhegalkin(std::string str) {
 	delete[] triangle;
 
 	
+	// Finding correspondences of terms of a polynomial and a binary notation of a number 
+	// Поиск соответствий членов полинома и двоичной записи
+
 	std::string pol = "";
 
 	for (int i = 0; i < table.size(); i++) {
@@ -823,53 +836,150 @@ std::string Boolean::zhegalkin(std::string str) {
 
 }
 
+bool Boolean::is_x(std::string str) {
+	if (str.find("x0") == -1)
+		return false;
+
+	return true;
+}
+
+std::string Boolean::change_x(std::string str) {
+
+	// Conversion from x0 in A, x1 in B and etc...
+	// Преобразование из x0 в A, x1 в B и т.д.
+
+	int sort = 0;
+	int max = -1;
+
+	if (!is_x(str))
+		return str;
+
+	str.push_back(' ');
+
+	for (int i = 0; i < str.length(); i++) {
+
+		if (str[i] >= '0' && str[i] <= '9') {
+			sort = str[i] - '0';
+		}
+		if (str[i] >= '0' && str[i] <= '9' && str[i + 1] >= '0' && str[i + 1] <= '9') {
+			sort = (str[i] - '0') * 10 + str[i + 1] - '0';
+		}
+
+		if (sort > max)
+			max = sort;
+	}
+
+	std::string temp = "";
+
+	for (int i = max; i >= 0; i--) {
+
+		temp.push_back('A' + i);
+
+		str = std::regex_replace(str, std::regex("x" + std::to_string(i)), temp);
+
+		temp.pop_back();
+
+	}
+
+	str.pop_back();
+
+	return str;
+}
+
+std::string Boolean::change_a(std::string str) {
+
+	// Conversion from A in x0, B in x1 and etc...
+	// Преобразование из A в x0, B в x1 и т.д.
+
+	int sort = 0;
+	int max = -1;
+
+	for (int i = 0; i < str.length() - 1; i++) {
+		if (str[i] >= 'A' && str[i] <= 'Z') {
+			sort = str[i] - 'A';
+		}
+
+		if (sort > max)
+			max = sort;
+	}
+
+	std::string temp = "";
+
+	for (int i = max; i >= 0; i--) {
+
+		temp.push_back('A' + i);
+
+		str = std::regex_replace(str, std::regex(temp), "x" + std::to_string(i));
+
+		temp.pop_back();
+
+	}
+
+	return str;
+
+}
 // Visible method.
 // Видимые методы.
 
 std::string Boolean::polynom(const std::string str) {
-	if (!checking_expression(str))
+	// Creating the Zhegalkin polynomial by the triangle method
+	// Создание полинома Жегалкина методом треугольника
+
+	
+	if (!checking_expression(change_x(str)))
 		throw std::exception("Error in the expression");
 
-	return zhegalkin(str);
+	// Error in the expression
+	// Ошибка в выражении
+
+	if (!is_x(str))
+		return zhegalkin(str);
+	else
+		return change_a(zhegalkin(change_x(str)));
+
 }
 
 std::string Boolean::simplify(const std::string str) {
 	// Return simplified expression
 	// Возврат упрощенного выражения 
 
-	if (!checking_expression(str))
+	if (!checking_expression(change_x(str)))
 		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
 
-	return simplifing(sort_table(build_simply_table(str, check_order(str))), check_order(str), str);
+	if (!is_x(str)) 
+		return simplifing(sort_table(build_simply_table(str, check_order(str))), check_order(str), str);
+	
+	else 
+		return change_a(simplifing(sort_table(build_simply_table(change_x(str), check_order(change_x(str)))), check_order(change_x(str)), change_x(str)));
 }
 
 std::vector <std::vector<bool>> Boolean::truth_table(const std::string str) {
 	// Return the truth table in the vector type
 	// Возврат таблицы истинности в типе vector
 
-	if (!checking_expression(str))
+	if (!checking_expression(change_x(str)))
 		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
 
-	return Boolean::build_table(str, Boolean::check_order(str));
+	return Boolean::build_table(change_x(str), Boolean::check_order(change_x(str)));
 }
 
 std::vector <bool> Boolean::result(const std::string str) {
 	// Return only result of logical expression
 	// Возврат только результата логического выражения
 
-	if (!checking_expression(str))
+	if (!checking_expression(change_x(str)))
 		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
 
-	std::vector <std::vector<bool>> table = Boolean::truth_table(str);
+	std::vector <std::vector<bool>> table = Boolean::truth_table(change_x(str));
 
 	std::vector <bool> table_result;
 
