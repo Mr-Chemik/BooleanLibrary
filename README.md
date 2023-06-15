@@ -15,7 +15,7 @@ A simple C++ library that allows you to perform various methods for working with
 
 ### Input:
 
-- **`All unique (used at least once) variables must be arranged alphabetically and in uppercase or x0, x1, x2... You can also use constants 0 and 1. `**
+- All unique (used at least once) variables must be arranged alphabetically and in uppercase or x0, x1, x2... You can also use constants 0 and 1.
 - **`()`** - Parenthesis for prioritizing operations.
 
 ### Operators:
