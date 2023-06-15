@@ -5,7 +5,7 @@
 
 int main() {
 
-	std::string input = "A+B*C";
+	std::string input = "A>!(0*B+C)^A";
 
 	std::vector <std::vector<bool>> vec = Boolean::truth_table(input);
 
@@ -27,7 +27,9 @@ int main() {
 
 	// Return Zhegalkin polynomial
 
-	input = "x0+x1*x2";
+
+
+	input = "x0>!(0*x1+x2)^x0";
 
 	vec = Boolean::truth_table(input);
 
