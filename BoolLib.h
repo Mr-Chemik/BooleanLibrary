@@ -25,8 +25,8 @@ private:
 	static std::string solving_expression(std::string str);
 	static std::string searching_bracket(std::string str, std::vector <int> value);
 	static std::vector <std::vector<bool>> build_table(std::string str, std::string sorting);
-	static std::string change_x(std::string str);
-	static std::string change_a(std::string str);
+	static std::string fix_input(std::string str);
+	static std::string fix_output(std::string str);
 	static bool is_x(std::string str);
 
 	static std::vector <std::vector<std::string>> build_simply_table(std::string str, std::string sorting);
@@ -82,7 +82,7 @@ std::string Boolean::check_order(std::string str) {
 	std::string sorting;
 
 	for (int i = 0; i < str.length(); i++) {
-		if (str[i] >= 65 && str[i] <= 90) {
+		if (str[i] >= 'A' && str[i] <= 'Z') {
 			if (sorting.length() == 0) {
 				sorting = str[i];
 				continue;
@@ -543,8 +543,10 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 	second_str = first_str;
 
 	for (int i = 0; i < sort.length(); i++) {
-		help = char(65 + i);
-		second_str.replace(second_str.find(sort[i]), 1, help);
+		for (int j = 0; j < second_str.length(); j++) {
+			if (second_str[j] == sort[i])
+				second_str[j] = char(65 + i);
+		}
 	}
 
 	std::vector <std::vector<bool>> symp_table = Boolean::truth_table(second_str);
@@ -718,7 +720,7 @@ bool Boolean::checking_expression(std::string str) {
 	}
 
 	for (int i = 0; i < str.length(); i++)
-		if (str[i] != '+' && str[i] != '*' && str[i] != '#' && str[i] != '|' && str[i] != '>' && str[i] != '^' && str[i] != '=' && str[i] != '!' && str[i] != '(' && str[i] != ')' && !(str[i] >= 65 && str[i] <= 90))
+		if (str[i] != '1' && str[i] != '0' && str[i] != '+' && str[i] != '*' && str[i] != '#' && str[i] != '|' && str[i] != '>' && str[i] != '^' && str[i] != '=' && str[i] != '!' && str[i] != '(' && str[i] != ')' && !(str[i] >= 'A' && str[i] <= 'Z'))
 			return false;
 
 	for (int i = 0; i < str.length(); i++) {
@@ -727,9 +729,9 @@ bool Boolean::checking_expression(std::string str) {
 		if (str[i] == ')')
 			count--;
 
-		if (i == 0 && (str[i] != '(' && str[i] != '!' && !(str[i] >= 65 && str[i] <= 90)))
+		if (i == 0 && (str[i] != '(' && str[i] != '!' && !(str[i] >= 'A' && str[i] < 'Z' || str[i] == '1' || str[i] == '0')))
 			return false;
-		if (i == str.length() - 1 && (str[i] != ')' && !(str[i] >= 65 && str[i] < 90)))
+		if (i == str.length() - 1 && (str[i] != ')' && !(str[i] >= 'A' && str[i] < 'Z' || str[i] == '1' || str[i] == '0')))
 			return false;
 	}
 
@@ -738,23 +740,23 @@ bool Boolean::checking_expression(std::string str) {
 		return false;
 
 	for (int i = 1; i < str.length(); i++) {
-		if ((str[i] >= 65 && str[i] <= 90) && (str[i - 1] != '+' && str[i - 1] != '*' && str[i - 1] != '|' && str[i - 1] != '#' && str[i - 1] != '=' && str[i - 1] != '>' && str[i - 1] != '^' && str[i - 1] != '!' && str[i - 1] != '('))
+		if (((str[i] >= 'A' && str[i] < 'Z' || str[i] == '1' || str[i] == '0')) && (str[i - 1] != '+' && str[i - 1] != '*' && str[i - 1] != '|' && str[i - 1] != '#' && str[i - 1] != '=' && str[i - 1] != '>' && str[i - 1] != '^' && str[i - 1] != '!' && str[i - 1] != '('))
 			return false;
-		if (str[i] == '(' && ((str[i - 1] >= 65 && str[i - 1] <= 90)))
+		if (str[i] == '(' && ((str[i - 1] >= 'A' && str[i - 1] <= 'Z' || str[i - 1] == '1' || str[i - 1] == '0')))
 			return false;
-		if ((!(str[i] >= 65 && str[i] <= 90) && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i - 1] >= 65 && str[i - 1] <= 90) && str[i - 1] != '(' && str[i - 1] != ')' && str[i - 1] != '!'))
+		if ((!(str[i] >= 'A' && str[i] <= 'Z' || str[i] == '1' || str[i] == '0') && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i - 1] >= 'A' && str[i - 1] <= 'Z' || str[i - 1] == '1' || str[i - 1] == '0') && str[i - 1] != '(' && str[i - 1] != ')' && str[i - 1] != '!'))
 			return false;
 	}
 
 	for (int i = 0; i < str.length() - 1; i++) {
-		if ((str[i] >= 65 && str[i] <= 90) && ((str[i + 1] != '+' && str[i + 1] != '|' && str[i + 1] != '*' && str[i + 1] != '#' && str[i + 1] != '=' && str[i + 1] != '>' && str[i + 1] != '^' && str[i + 1] != ')'))) {
+		if ((str[i] >= 'A' && str[i] <= 'Z' || str[i] == '0' || str[i] == '1') && ((str[i + 1] != '+' && str[i + 1] != '|' && str[i + 1] != '*' && str[i + 1] != '#' && str[i + 1] != '=' && str[i + 1] != '>' && str[i + 1] != '^' && str[i + 1] != ')'))) {
 			return false;
 		}
-		if (str[i] == '(' && (!(str[i + 1] >= 65 && str[i + 1] <= 90) && str[i + 1] != '!' && str[i + 1] != '(')) {
+		if (str[i] == '(' && (!(str[i + 1] >= 'A' && str[i + 1] <= 'Z' || str[i + 1] == '0' || str[i + 1] == '1') && str[i + 1] != '!' && str[i + 1] != '(')) {
 			return false;
 		}
 
-		if ((!(str[i] >= 65 && str[i] <= 90) && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i + 1] >= 65 && str[i + 1] <= 90) && str[i + 1] != '(' && str[i + 1] != ')' && str[i + 1] != '!')) {
+		if ((!(str[i] >= 'A' && str[i] <= 'Z' || str[i] == '1' || str[i] == '0') && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i + 1] >= 'A' && str[i + 1] <= 'Z' || str[i + 1] == '1' || str[i + 1] == '0') && str[i + 1] != '(' && str[i + 1] != ')' && str[i + 1] != '!')) {
 			return false;
 		}
 	}
@@ -775,7 +777,7 @@ std::string Boolean::zhegalkin(std::string str) {
 	// Initializing and filling pascal's triangle
 	// Инициализация и заполнение треугольника Паскаля
 
-	bool** triangle = new bool*[size_of_result];
+	bool** triangle = new bool* [size_of_result];
 
 	for (int i = 0; i < size_of_result; i++) {
 		triangle[i] = new bool[size_of_result - i];
@@ -801,7 +803,7 @@ std::string Boolean::zhegalkin(std::string str) {
 
 	delete[] triangle;
 
-	
+
 	// Finding correspondences of terms of a polynomial and a binary notation of a number 
 	// Поиск соответствий членов полинома и двоичной записи
 
@@ -818,7 +820,7 @@ std::string Boolean::zhegalkin(std::string str) {
 			}
 
 			if (table[i][table[i].size() - 1] == 1) {
-				
+
 				if (table[i][j] == 1)
 					pol = pol + char('A' + j);
 			}
@@ -827,10 +829,11 @@ std::string Boolean::zhegalkin(std::string str) {
 
 		if (table[i][table[i].size() - 1] == 1)
 			pol = pol + '^';
-		
+
 	}
 
-	pol.pop_back();
+	if(pol.size() > 0)
+		pol.pop_back();
 
 	return pol;
 
@@ -843,13 +846,30 @@ bool Boolean::is_x(std::string str) {
 	return true;
 }
 
-std::string Boolean::change_x(std::string str) {
+std::string Boolean::fix_input(std::string str) {
 
-	// Conversion from x0 in A, x1 in B and etc...
-	// Преобразование из x0 в A, x1 в B и т.д.
+	// Remove ' ' from str
+	// Исключение ' ' из str
+
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] == ' ') {
+			str.erase(str.begin() + i);
+			i = 0;
+		}
+	}
+
+	for (int i = 0; i < str.length() - 1; i++) {
+		if (str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] >= 'A' && str[i + 1] <= 'Z') {
+			str.insert(str.begin() + i + 1, '*');
+			i = 0;
+		}
+	}
 
 	int sort = 0;
 	int max = -1;
+
+	// Conversion from x0 in A, x1 in B and etc...
+	// Преобразование из x0 в A, x1 в B и т.д.
 
 	if (!is_x(str))
 		return str;
@@ -883,10 +903,20 @@ std::string Boolean::change_x(std::string str) {
 
 	str.pop_back();
 
+	// Fixing AB in A*B
+	// Исправление AB в A*B
+
+	for (int i = 0; i < str.length() - 1; i++) {
+		if (str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] >= 'A' && str[i + 1] <= 'Z') {
+			str.insert(str.begin() + i + 1, '*');
+			i = 0;
+		}
+	}
+
 	return str;
 }
 
-std::string Boolean::change_a(std::string str) {
+std::string Boolean::fix_output(std::string str) {
 
 	// Conversion from A in x0, B in x1 and etc...
 	// Преобразование из A в x0, B в x1 и т.д.
@@ -894,7 +924,7 @@ std::string Boolean::change_a(std::string str) {
 	int sort = 0;
 	int max = -1;
 
-	for (int i = 0; i < str.length() - 1; i++) {
+	for (int i = 0; i < str.length(); i++) {
 		if (str[i] >= 'A' && str[i] <= 'Z') {
 			sort = str[i] - 'A';
 		}
@@ -925,61 +955,79 @@ std::string Boolean::polynom(const std::string str) {
 	// Creating the Zhegalkin polynomial by the triangle method
 	// Создание полинома Жегалкина методом треугольника
 
-	
-	if (!checking_expression(change_x(str)))
+	std::string input = str;
+
+	input = fix_input(input);
+
+	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
 
 	if (!is_x(str))
-		return zhegalkin(str);
+		return zhegalkin(input);
 	else
-		return change_a(zhegalkin(change_x(str)));
+		return fix_output(zhegalkin(input));
 
 }
 
 std::string Boolean::simplify(const std::string str) {
+
+	std::string input = str;
+
+	input = fix_input(input);
+
 	// Return simplified expression
 	// Возврат упрощенного выражения 
 
-	if (!checking_expression(change_x(str)))
+	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
 
-	if (!is_x(str)) 
-		return simplifing(sort_table(build_simply_table(str, check_order(str))), check_order(str), str);
-	
-	else 
-		return change_a(simplifing(sort_table(build_simply_table(change_x(str), check_order(change_x(str)))), check_order(change_x(str)), change_x(str)));
+	if (!is_x(str))
+		return simplifing(sort_table(build_simply_table(input, check_order(input))), check_order(input), input);
+
+	else
+		return fix_output(simplifing(sort_table(build_simply_table(input, check_order(input))), check_order(input), input));
 }
 
 std::vector <std::vector<bool>> Boolean::truth_table(const std::string str) {
+
+	std::string input = str;
+
+	input = fix_input(input);
+
 	// Return the truth table in the vector type
 	// Возврат таблицы истинности в типе vector
 
-	if (!checking_expression(change_x(str)))
+	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
 
-	return Boolean::build_table(change_x(str), Boolean::check_order(change_x(str)));
+	return Boolean::build_table(input, Boolean::check_order(input));
 }
 
 std::vector <bool> Boolean::result(const std::string str) {
+
+	std::string input = str;
+
+	input = fix_input(input);
+
 	// Return only result of logical expression
 	// Возврат только результата логического выражения
 
-	if (!checking_expression(change_x(str)))
+	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
 
 	// Error in the expression
 	// Ошибка в выражении
 
-	std::vector <std::vector<bool>> table = Boolean::truth_table(change_x(str));
+	std::vector <std::vector<bool>> table = Boolean::truth_table(input);
 
 	std::vector <bool> table_result;
 
