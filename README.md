@@ -39,7 +39,3 @@ A simple C++ library that allows you to perform various methods for working with
 ## Developers
 
 - [Gordey Piterin](https://github.com/bogoizbranniy)
-
-## License
-
-Project BoolLibrary is distributed under the MIT license.
