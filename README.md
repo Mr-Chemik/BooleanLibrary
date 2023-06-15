@@ -1,88 +1,45 @@
-# BooleanLibrary
-A C++ library to help you work with Boolean algebra.
+<p align="center">
+      <img src="https://drive.google.com/uc?export=download&confirm=no_antivirus&id=1SfyN1lorIzgTlXpDrQ_nP0ssHD3r8TEd" width="500">
+</p>
 
-(EN) Instruction for use:
+<p align="center">
+   <img src="https://img.shields.io/badge/Version-v1.0-blue" alt="Version">
+   <img src="https://img.shields.io/badge/License-MIT-success" alt="License">
+</p>
 
-All unique (used at least once) variables must be in alphabetical order and in uppercase or x0, x1, x2...
+## About
 
-'()' - open and close brackets
+A simple C++ library that allows you to perform various methods for working with Boolean algebra.
 
-Logical operations:
+## Documentation
 
-'!' - NOT
+### Input:
 
-'*' - AND
+- **`All unique (used at least once) variables must be arranged alphabetically and in uppercase or x0, x1, x2...`**
+- **`()`** - Parenthesis for prioritizing operations.
 
-'+' - OR
+### Operators:
 
-Logical operations without a certain order:
+- **`!`** - NOT
+- **`*`** - AND
+- **`+`** - OR 
+- **`^`** - XOR
+- **`=`** - XNOR
+- **`>`** - IMPLY
+- **`|`** - NAND
+- **`#`** - NOR
 
-'|' - NAND
+### Methods:
 
-'^' - XOR
+- **`Boolean::simlplify (string str)`** - Return of a simplified boolean expression.
+- **`Boolean::truth_table (string str)`** - Return of the truth table by boolean expression.
+- **`Boolean::result (string str)`** - Returns the result of a boolean expression table.
+- **`Boolean::polynom (string str)`** - Return of the Zhegalkin polynomial by a boolean expression.
 
-'#' - NOR
+## Developers
 
-'>' - IMPLY
+- [Gordey Piterin](https://github.com/bogoizbranniy)
 
-'=' - XNOR
+## License
 
-
-List of method:
-
-Boolean::simlplify(string str) - simplifying a boolean expression (return data - string)
-
-Boolean::truth_table(string str) - building a truth table based on a given expression (return data - vector<vector < bool > >)
-
-Boolean::result(string str)- returning only the result of the truth table (return data - vector< bool >)
-
-Boolean::polynom(string str) - return of the Zhegalkin polynomial by a given expression (return data - string)
-
-Exsample of simplifying:
-Input: A>B+(!A*C)+D  x0>x1+(!x0*x2)+x3
-
-Output: !A+D+B  !x0+x3+x1
-
-
-Библиотека для помощи в работе с булевой алгеброй.
-
-(RU) Инструкция по применению:
-
-Все уникальные (содержащиеся в едином экземпляре) переменные должны быть в алфавитном порядке и в верхнем регистре или x0, x1, x2...
-
-'()' - открывающая и закрывающая скобка
-
-Логические операции:
-
-'!' - Отрицание
-
-'*' - Конъюнкция
-
-'+' - Дизъюнкция
-
-Логические переменные без четкого порядка:
-
-'|' - Штрих Шеффера
-
-'^' - Исключающее или
-
-'#' - Стрелка Пирса
-
-'>' - Импликация
-
-'=' - Эквивалентность
-
-Список Методов:
-
-Boolean::simlplify(string str) - упрощение булевого выражения (возвращаемые данные - string)
-
-Boolean::truth_table(string str) - построение таблицы истинности по заданному выражению (возвращаемые данные - vector<vector < bool > >)
-
-Boolean::result(string str)- возврат только результата таблицы истинности (возвращаемые данные - vector< bool >)
-
-Boolean::polynom(string str) - возврат полинома Жегалкина по зданному выражению (возвращаемы данные - string)
-
-Пример упрощения:
-Вход: A>B+(!A*C)+D  x0>x1+(!x0*x2)+x3
-
-Выход: !A+D+B  !x0+x3+x1
+Project BoolLibrary is distributed under the MIT license.
