@@ -2,80 +2,161 @@
 #ifndef _BOOLLIB_H_
 #define _BOOLLIB_H_
 
+#include <cmath>
+#include <regex>
 #include <vector>
 #include <string>
-#include <cmath>
 #include <algorithm>
-#include <regex>
 
 class Boolean {
 public:
 	static std::string polynom(const std::string);
-	static std::vector <std::vector<bool>> truth_table(const std::string str);
-	static std::vector <bool> result(const std::string str);
 	static std::string simplify(const std::string str);
+	static std::vector <bool> result(const std::string str);
+	static std::vector <std::vector<bool>> truth_table(const std::string str);
+	static std::vector <std::vector<std::string>> karnaugh(const std::string str);
 
 private:
 #define MATRIX_X sorted_table.size() / 2 + 1
 #define MATRIX_Y pdnf_sorted_table.size() + 1
 
-	static std::string zhegalkin(std::string str);
-	static bool checking_expression(std::string str);
+	static bool is_x(std::string str);
+	static std::string fix_input(std::string str);
+	static std::string fix_output(std::string str);
 	static std::string check_order(std::string str);
+	static bool checking_expression(std::string str);
+
 	static std::string solving_expression(std::string str);
 	static std::string searching_bracket(std::string str, std::vector <int> value);
 	static std::vector <std::vector<bool>> build_table(std::string str, std::string sorting);
-	static std::string fix_input(std::string str);
-	static std::string fix_output(std::string str);
-	static bool is_x(std::string str);
 
-	static std::vector <std::vector<std::string>> build_simply_table(std::string str, std::string sorting);
 	static std::vector <std::string> sort_table(std::vector <std::vector<std::string>> table);
+	static std::vector <std::vector<std::string>> build_simply_table(std::string str, std::string sorting);
 	static std::string simplifing(std::vector <std::string> sorted_table, std::string sorting, std::string str);
+
+	static std::string zhegalkin(std::string str);
+
+	static std::vector <std::string> gray_code(int size);
+	static std::vector <std::vector<std::string>> build_karnaugh(std::string str);
 };
 
-std::vector <std::vector<bool>> Boolean::build_table(std::string str, std::string sorting) {
-	// Building a truth table by int
-	// Строит таблицу истинности из целочисленных переменных
-	int x;
-	int y;
-	int count;
 
-	x = sorting.length();
+bool Boolean::is_x(std::string str) {
 
-	y = pow(2, x);
+	// Содержит ли строка x-переменные
+	// Does the string contain x-variables
 
-	std::vector <int> value(x);
+	if (str.find("x0") == -1)
+		return false;
 
-	x = x + 1;
+	return true;
+}
 
-	std::vector < std::vector <bool>> table(y);
+std::string Boolean::fix_input(std::string str) {
 
-	for (int i = 0; i < y; i++)
-		table[i].resize(x);
+	// Remove ' ' from str
+	// Исключение ' ' из str
 
-	for (int i = 0; i < y; i++) {
-		count = i;
-		for (int j = x - 2; j >= 0; j--) {
-			if (count % 2 == 0) {
-				table[i][j] = 0;
-				value[j] = 0;
-			}
-			else {
-				table[i][j] = 1;
-				value[j] = 1;
-			}
-			count = count / 2;
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] == ' ') {
+			str.erase(str.begin() + i);
+			i = 0;
 		}
-		// "Sending" the values of the truth table fields for the solution
-		// "Отправка" значений полей таблицы истинности для решения
-		table[i][x - 1] = atoi(searching_bracket(str, value).c_str());
 	}
 
-	return table;
+	for (int i = 0; i < str.length() - 1; i++) {
+		if ((str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] >= 'A' && str[i + 1] <= 'Z') || (str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] == '!')) {
+			str.insert(str.begin() + i + 1, '*');
+			i = 0;
+		}
+	}
+
+	int sort = 0;
+	int max = -1;
+
+	// Conversion from x0 in A, x1 in B and etc...
+	// Преобразование из x0 в A, x1 в B и т.д.
+
+	if (!is_x(str))
+		return str;
+
+	str.push_back(' ');
+
+	for (int i = 0; i < str.length(); i++) {
+
+		if (str[i] >= '0' && str[i] <= '9') {
+			sort = str[i] - '0';
+		}
+		if (str[i] >= '0' && str[i] <= '9' && str[i + 1] >= '0' && str[i + 1] <= '9') {
+			sort = (str[i] - '0') * 10 + str[i + 1] - '0';
+		}
+
+		if (sort > max)
+			max = sort;
+	}
+
+	std::string temp = "";
+
+	for (int i = max; i >= 0; i--) {
+
+		temp.push_back('A' + i);
+
+		str = std::regex_replace(str, std::regex("x" + std::to_string(i)), temp);
+
+		temp.pop_back();
+
+	}
+
+	str.pop_back();
+
+	// Fixing AB in A*B
+	// Исправление AB в A*B
+
+	for (int i = 0; i < str.length() - 1; i++) {
+		if (str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] >= 'A' && str[i + 1] <= 'Z') {
+			str.insert(str.begin() + i + 1, '*');
+			i = 0;
+		}
+	}
+
+	return str;
+}
+
+std::string Boolean::fix_output(std::string str) {
+
+	// Conversion from A in x0, B in x1 and etc...
+	// Преобразование из A в x0, B в x1 и т.д.
+
+	int sort = 0;
+	int max = -1;
+
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] >= 'A' && str[i] <= 'Z') {
+			sort = str[i] - 'A';
+		}
+
+		if (sort > max)
+			max = sort;
+	}
+
+	std::string temp = "";
+
+	for (int i = max; i >= 0; i--) {
+
+		temp.push_back('A' + i);
+
+		str = std::regex_replace(str, std::regex(temp), "x" + std::to_string(i));
+
+		temp.pop_back();
+
+	}
+
+	return str;
+
 }
 
 std::string Boolean::check_order(std::string str) {
+
 	// Checking an expression for an alphabetical sequence.
 	// Проверка выражения на наличие алфавитной последовательности.
 
@@ -103,71 +184,67 @@ std::string Boolean::check_order(std::string str) {
 	return sorting;
 }
 
-std::string Boolean::searching_bracket(std::string str, std::vector <int> value) {
-	// Search for parentheses, and solve them.
-	// Поиск скобок, и их решение.
-	std::string help;
-	std::string brackets;
-	bool first = true;
-	bool brackets_exist = false;
-	int end = 0;
-	int start = 0;
+bool Boolean::checking_expression(std::string str) {
+
+	// Checking correctness of expression
+	// Проверка выражения на корректность
+
+	int count = 0;
+
+	std::string sort_str = Boolean::check_order(str);
+
+	for (int i = 0; i < sort_str.length() - 1; i++) {
+		if (sort_str[i] + 1 != sort_str[i + 1])
+			return false;
+	}
+
+	for (int i = 0; i < str.length(); i++)
+		if (str[i] != '1' && str[i] != '0' && str[i] != '+' && str[i] != '*' && str[i] != '#' && str[i] != '|' && str[i] != '>' && str[i] != '^' && str[i] != '=' && str[i] != '!' && str[i] != '(' && str[i] != ')' && !(str[i] >= 'A' && str[i] <= 'Z'))
+			return false;
 
 	for (int i = 0; i < str.length(); i++) {
-		if (str[i] >= 65 && str[i] <= 90) {
-			help = std::to_string(value[str[i] - 'A']);
-			str[i] = help[0];
-		}
 		if (str[i] == '(')
-			brackets_exist = true;
+			count++;
+		if (str[i] == ')')
+			count--;
+
+		if (i == 0 && (str[i] != '(' && str[i] != '!' && !(str[i] >= 'A' && str[i] < 'Z' || str[i] == '1' || str[i] == '0')))
+			return false;
+		if (i == str.length() - 1 && (str[i] != ')' && !(str[i] >= 'A' && str[i] < 'Z' || str[i] == '1' || str[i] == '0')))
+			return false;
 	}
 
-	while (brackets_exist) {
-		for (int i = 0; i < str.length(); i++) {
-			if (str[i] == '(') {
-				if (!first)
-					break;
 
-				start = i;
-			}
-			if (str[i] == ')') {
-				if (first) {
-					end = i;
-					first = false;
-				}
-			}
+	if (count != 0)
+		return false;
+
+	for (int i = 1; i < str.length(); i++) {
+		if (((str[i] >= 'A' && str[i] < 'Z' || str[i] == '1' || str[i] == '0')) && (str[i - 1] != '+' && str[i - 1] != '*' && str[i - 1] != '|' && str[i - 1] != '#' && str[i - 1] != '=' && str[i - 1] != '>' && str[i - 1] != '^' && str[i - 1] != '!' && str[i - 1] != '('))
+			return false;
+		if (str[i] == '(' && ((str[i - 1] >= 'A' && str[i - 1] <= 'Z' || str[i - 1] == '1' || str[i - 1] == '0')))
+			return false;
+		if ((!(str[i] >= 'A' && str[i] <= 'Z' || str[i] == '1' || str[i] == '0') && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i - 1] >= 'A' && str[i - 1] <= 'Z' || str[i - 1] == '1' || str[i - 1] == '0') && str[i - 1] != '(' && str[i - 1] != ')' && str[i - 1] != '!'))
+			return false;
+	}
+
+	for (int i = 0; i < str.length() - 1; i++) {
+		if ((str[i] >= 'A' && str[i] <= 'Z' || str[i] == '0' || str[i] == '1') && ((str[i + 1] != '+' && str[i + 1] != '|' && str[i + 1] != '*' && str[i + 1] != '#' && str[i + 1] != '=' && str[i + 1] != '>' && str[i + 1] != '^' && str[i + 1] != ')'))) {
+			return false;
+		}
+		if (str[i] == '(' && (!(str[i + 1] >= 'A' && str[i + 1] <= 'Z' || str[i + 1] == '0' || str[i + 1] == '1') && str[i + 1] != '!' && str[i + 1] != '(')) {
+			return false;
 		}
 
-		brackets = str[start];
-
-		for (int j = start + 1; j <= end; j++)
-			brackets = brackets + str[j];
-
-		help = brackets;
-
-		str.replace(str.find(brackets), brackets.length(), solving_expression(help));
-
-
-		first = true;
-
-		for (int i = 0; i < str.length(); i++) {
-			if (str[i] == ')')
-				break;
-
-			if (i == str.length() - 1)
-				brackets_exist = false;
-
+		if ((!(str[i] >= 'A' && str[i] <= 'Z' || str[i] == '1' || str[i] == '0') && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i + 1] >= 'A' && str[i + 1] <= 'Z' || str[i + 1] == '1' || str[i + 1] == '0') && str[i + 1] != '(' && str[i + 1] != ')' && str[i + 1] != '!')) {
+			return false;
 		}
 	}
 
-	help = str;
-
-	str = solving_expression(help);
-
-	return str;
+	return true;
 }
 
 std::string Boolean::solving_expression(std::string str) {
+
 	// Solving An Expression.
 	// Решение Выражения.
 
@@ -370,7 +447,163 @@ std::string Boolean::solving_expression(std::string str) {
 	return str;
 }
 
+std::string Boolean::searching_bracket(std::string str, std::vector <int> value) {
+
+	// Search for parentheses, and solve them.
+	// Поиск скобок, и их решение.
+	std::string help;
+	std::string brackets;
+	bool first = true;
+	bool brackets_exist = false;
+	int end = 0;
+	int start = 0;
+
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] >= 65 && str[i] <= 90) {
+			help = std::to_string(value[str[i] - 'A']);
+			str[i] = help[0];
+		}
+		if (str[i] == '(')
+			brackets_exist = true;
+	}
+
+	while (brackets_exist) {
+		for (int i = 0; i < str.length(); i++) {
+			if (str[i] == '(') {
+				if (!first)
+					break;
+
+				start = i;
+			}
+			if (str[i] == ')') {
+				if (first) {
+					end = i;
+					first = false;
+				}
+			}
+		}
+
+		brackets = str[start];
+
+		for (int j = start + 1; j <= end; j++)
+			brackets = brackets + str[j];
+
+		help = brackets;
+
+		str.replace(str.find(brackets), brackets.length(), solving_expression(help));
+
+
+		first = true;
+
+		for (int i = 0; i < str.length(); i++) {
+			if (str[i] == ')')
+				break;
+
+			if (i == str.length() - 1)
+				brackets_exist = false;
+
+		}
+	}
+
+	help = str;
+
+	str = solving_expression(help);
+
+	return str;
+}
+
+std::vector <std::vector<bool>> Boolean::build_table(std::string str, std::string sorting) {
+
+	// Building a truth table by int
+	// Строит таблицу истинности из целочисленных переменных
+
+	int x;
+	int y;
+	int count;
+
+	x = sorting.length();
+
+	y = pow(2, x);
+
+	std::vector <int> value(x);
+
+	x = x + 1;
+
+	std::vector < std::vector <bool>> table(y);
+
+	for (int i = 0; i < y; i++)
+		table[i].resize(x);
+
+	for (int i = 0; i < y; i++) {
+		count = i;
+		for (int j = x - 2; j >= 0; j--) {
+			if (count % 2 == 0) {
+				table[i][j] = 0;
+				value[j] = 0;
+			}
+			else {
+				table[i][j] = 1;
+				value[j] = 1;
+			}
+			count = count / 2;
+		}
+		// "Sending" the values of the truth table fields for the solution
+		// "Отправка" значений полей таблицы истинности для решения
+		table[i][x - 1] = atoi(searching_bracket(str, value).c_str());
+	}
+
+	return table;
+}
+
+std::vector <std::vector<std::string>> Boolean::build_simply_table(std::string str, std::string sorting) {
+
+	// Building a truth table from string
+	// Построение таблицы истинности из string
+
+	int x;
+	int y;
+	int count;
+	char current_symb;
+	std::string exp = "";
+
+	x = sorting.length();
+
+	y = pow(2, x);
+
+
+	std::vector <int> value(x);
+
+	std::vector < std::vector <std::string>> table(y);
+
+	for (int i = 0; i < y; i++)
+		table[i].resize(2);
+
+	for (int i = 0; i < y; i++) {
+		count = i;
+		for (int j = x - 1; j >= 0; j--) {
+			if (count % 2 == 0) {
+				current_symb = char('a' + j);
+				exp = exp + current_symb;
+				value[j] = 0;
+			}
+			else {
+				current_symb = char('A' + j);
+				exp = exp + current_symb;
+				value[j] = 1;
+			}
+			count = count / 2;
+		}
+		std::reverse(exp.begin(), exp.end());
+		table[i][0] = exp;
+		table[i][1] = Boolean::searching_bracket(str, value);
+		exp = "";
+	}
+
+	return table;
+}
+
 std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::string sorting, std::string str) {
+
 	// Simplifying the expression Quine's method.
 	// Упрощение выражение методом Куайна
 
@@ -386,6 +619,7 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 	std::string second_compare;
 	std::string combo = "";
 
+
 	std::vector <std::string> pdnf_sorted_table;
 	std::vector <std::string> simplify_sorted_table = sorted_table;
 
@@ -399,8 +633,10 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 
 	for (int i = 0; i < end; i = i + 2) {
 		for (int j = begin; j < end; j = j + 2) {
+
 			if (i == j)
 				continue;
+
 			combo = "";
 			last_end = end;
 			first_str = simplify_sorted_table[i];
@@ -409,11 +645,11 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 			second_compare = second_str;
 
 			for (int i = 0; i < first_compare.length(); i++) {
-				if (first_compare[i] > 96)
-					first_compare[i] = first_compare[i] - 32;
+				if (first_compare[i] >= 'a')
+					first_compare[i] = first_compare[i] - 32; // -32 make a -> A
 			}
 			for (int i = 0; i < second_compare.length(); i++) {
-				if (second_compare[i] > 96)
+				if (second_compare[i] >= 'a')
 					second_compare[i] = second_compare[i] - 32;
 			}
 
@@ -448,6 +684,7 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 			begin = last_end;
 		}
 	}
+
 
 	// Construction of the implicant matrix
 	// Построение импликантной матрицы
@@ -493,11 +730,14 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 
 	first_str = "";
 
-	// Filling in the implication matrix
-	// Заполнение импликантной матрицы
+	// Filling in the implicant matrix and including the expression core.
+	// Заполнение импликантной матрицы и включение ядра выражения.
+
+	std::vector <int> null_pos;
 
 	for (int i = 1; i < MATRIX_X; i++) {
 		unic = 0;
+		unic_y = 0;
 		for (int j = 1; j < MATRIX_Y; j++) {
 			if (impl_matrix[j][i] == "1") {
 				unic_y = j;
@@ -506,194 +746,89 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 			if (unic == 1 && j == MATRIX_Y - 1) {
 				if (impl_matrix[unic_y][0] == "NULL")
 					break;
+				null_pos.push_back(unic_y);
 				first_str = first_str + impl_matrix[unic_y][0] + "+";
 				impl_matrix[unic_y][0] = "NULL";
 			}
 		}
 	}
 
+	int max_unic = -1;
+
+	bool full = false;
+
+	// Filling the expression with additional terms that close the maximum number of matrix cells.
+	// Заполнение выражения дополнительными членами, которые закрывают максимальное количество ячеек матрицы.
+
+	while (!full) {
+
+		max_unic = -1;
+
+		for (int i = 1; i < MATRIX_Y; i++) {
+
+			unic = 0;
+
+			for (int j = 1; j < MATRIX_X; j++) {
+				for (int k = 0; k < null_pos.size(); k++) {
+
+					if (null_pos[k] == i)
+						break;
+
+					if (impl_matrix[i][j] == "1" && impl_matrix[null_pos[k]][j] == "0")
+						unic++;
+				}
+			}
+
+			if (max_unic < unic) {
+				max_unic = unic;
+				unic_y = i;
+			}
+
+		}
+
+		null_pos.push_back(unic_y);
+
+		if(impl_matrix[unic_y][0] != "NULL")
+			first_str = first_str + impl_matrix[unic_y][0] + "+";
+
+		impl_matrix[unic_y][0] = "NULL";
+
+		full = true;
+
+		for (int j = 1; j < MATRIX_X; j++) {
+			for (int i = 0; i < null_pos.size(); i++)
+				unic = unic + (impl_matrix[null_pos[i]][j][0] - '0');
+
+			if (unic == 0) 
+				full = false;
+
+			unic = 0;
+		}
+
+	}
 
 	// Transformation of expression into a normal form.
 	// Трансофрмация выражения в нормальную форму.
 
+
 	for (int i = 0; i < first_str.length(); i++) {
-		if (first_str[i] > 96) {
+		if (first_str[i] >= 'a') {
 			combo = (first_str[i] - 32);
 			second_str = "!";
 			first_str.replace(first_str.find(first_str[i]), 1, second_str + combo);
 		}
 	}
 
-	// Change "AB" in "A*B"
-	// Замена "AB" в "A*B"
-
-	for (int i = 0; i < first_str.length() - 1; i++) {
-		if ((first_str[i] >= 65 && first_str[i] <= 90) && (first_str[i + 1] == '!' || (first_str[i + 1] >= 65 && first_str[i + 1] <= 90)))
-			first_str.insert(i + 1, "*");
-	}
-
 	first_str.erase(first_str.length() - 1);
-
-	// Checking the expression for errors.
-	// Проверка выражения на ошибки.
-
-	std::string sort = Boolean::check_order(first_str);
-	std::string help;
-
-	second_str = first_str;
-
-	for (int i = 0; i < sort.length(); i++) {
-		for (int j = 0; j < second_str.length(); j++) {
-			if (second_str[j] == sort[i])
-				second_str[j] = char(65 + i);
-		}
-	}
-
-	std::vector <std::vector<bool>> symp_table = Boolean::truth_table(second_str);
-	std::vector <std::vector<bool>> str_table = Boolean::truth_table(str);
-	std::vector <int> id_num;
-
-	for (int i = 0; i < sort.length(); i++)
-		id_num.push_back(sort[i] - 65);
-
-	int comp = 0;
-	bool problem = false;
-	bool exit = false;
-
-	for (int j = 0; j < str_table.size(); j++) {
-		for (int k = 0; k < symp_table.size(); k++) {
-			for (int i = 0; i < id_num.size(); i++) {
-				if (symp_table[k][i] == str_table[j][id_num[i]])
-					comp++;
-			}
-			if (comp != Boolean::check_order(first_str).length())
-				comp = 0;
-			else {
-				if (symp_table[k][symp_table[0].size() - 1] != str_table[j][str_table[0].size() - 1])
-					problem = true;
-				comp = 0;
-			}
-		}
-	}
-
-	// Fixing errors
-	// Исправление ошибок
-
-	while (problem) {
-		exit = false;
-		id_num.clear();
-
-		first_str.push_back('+');
-		for (int i = 1; i < MATRIX_Y; i++) {
-			if (impl_matrix[i][0] != "NULL") {
-				first_str = first_str + impl_matrix[i][0] + "+";
-				impl_matrix[i][0] = "NULL";
-				break;
-			}
-		}
-
-		for (int i = 0; i < first_str.length(); i++) {
-			if (first_str[i] > 96) {
-				combo = (first_str[i] - 32);
-				second_str = "!";
-				first_str.replace(first_str.find(first_str[i]), 1, second_str + combo);
-			}
-		}
-
-		for (int i = 0; i < first_str.length() - 1; i++) {
-			if ((first_str[i] >= 65 && first_str[i] <= 90) && (first_str[i + 1] == '!' || (first_str[i + 1] >= 65 && first_str[i + 1] <= 90)))
-				first_str.insert(i + 1, "*");
-		}
-
-		first_str.erase(first_str.length() - 1);
-
-		second_str = first_str;
-
-		for (int i = 0; i < sort.length(); i++) {
-			help = char(65 + i);
-			second_str.replace(second_str.find(sort[i]), 1, help);
-		}
-
-		symp_table = Boolean::truth_table(second_str);
-		str_table = Boolean::truth_table(str);
-
-		for (int i = 0; i < sort.length(); i++)
-			id_num.push_back(sort[i] - 65);
-
-
-		for (int j = 0; j < str_table.size(); j++) {
-			for (int k = 0; k < symp_table.size(); k++) {
-				for (int i = 0; i < id_num.size(); i++) {
-					if (symp_table[k][i] == str_table[j][id_num[i]])
-						comp++;
-				}
-				if (comp != Boolean::check_order(first_str).length())
-					comp = 0;
-				else {
-					if (symp_table[k][symp_table[0].size() - 1] != str_table[j][str_table[0].size() - 1]) {
-						problem = true;
-						exit = true;
-					}
-					comp = 0;
-				}
-			}
-			if (j == str_table.size() - 1 && exit == false)
-				problem = false;
-		}
-	}
-
 
 	return first_str;
 }
 
-std::vector <std::vector<std::string>> Boolean::build_simply_table(std::string str, std::string sorting) {
-	// Building a truth table from string
-	// Построение таблицы истинности из string
-	int x;
-	int y;
-	int count;
-	char current_symb;
-	std::string exp = "";
-
-	x = sorting.length();
-
-	y = pow(2, x);
-
-
-	std::vector <int> value(x);
-
-	std::vector < std::vector <std::string>> table(y);
-
-	for (int i = 0; i < y; i++)
-		table[i].resize(2);
-
-	for (int i = 0; i < y; i++) {
-		count = i;
-		for (int j = x - 1; j >= 0; j--) {
-			if (count % 2 == 0) {
-				current_symb = char('a' + j);
-				exp = exp + current_symb;
-				value[j] = 0;
-			}
-			else {
-				current_symb = char('A' + j);
-				exp = exp + current_symb;
-				value[j] = 1;
-			}
-			count = count / 2;
-		}
-		std::reverse(exp.begin(), exp.end());
-		table[i][0] = exp;
-		table[i][1] = Boolean::searching_bracket(str, value);
-		exp = "";
-	}
-
-	return table;
-}
-
 std::vector <std::string> Boolean::sort_table(std::vector <std::vector<std::string>> table) {
+
 	// Sorts a table to get a table from truthful expressions.
 	// Сортировка таблицы для получение только верных выражений
+
 	std::vector<std::string> sorted_table(0);
 
 	for (int i = 0; i < table.size(); i++) {
@@ -704,64 +839,6 @@ std::vector <std::string> Boolean::sort_table(std::vector <std::vector<std::stri
 	}
 
 	return sorted_table;
-}
-
-bool Boolean::checking_expression(std::string str) {
-	// Checking correctness of expression
-	// Проверка выражения на корректность
-
-	int count = 0;
-
-	std::string sort_str = Boolean::check_order(str);
-
-	for (int i = 0; i < sort_str.length() - 1; i++) {
-		if (sort_str[i] + 1 != sort_str[i + 1])
-			return false;
-	}
-
-	for (int i = 0; i < str.length(); i++)
-		if (str[i] != '1' && str[i] != '0' && str[i] != '+' && str[i] != '*' && str[i] != '#' && str[i] != '|' && str[i] != '>' && str[i] != '^' && str[i] != '=' && str[i] != '!' && str[i] != '(' && str[i] != ')' && !(str[i] >= 'A' && str[i] <= 'Z'))
-			return false;
-
-	for (int i = 0; i < str.length(); i++) {
-		if (str[i] == '(')
-			count++;
-		if (str[i] == ')')
-			count--;
-
-		if (i == 0 && (str[i] != '(' && str[i] != '!' && !(str[i] >= 'A' && str[i] < 'Z' || str[i] == '1' || str[i] == '0')))
-			return false;
-		if (i == str.length() - 1 && (str[i] != ')' && !(str[i] >= 'A' && str[i] < 'Z' || str[i] == '1' || str[i] == '0')))
-			return false;
-	}
-
-
-	if (count != 0)
-		return false;
-
-	for (int i = 1; i < str.length(); i++) {
-		if (((str[i] >= 'A' && str[i] < 'Z' || str[i] == '1' || str[i] == '0')) && (str[i - 1] != '+' && str[i - 1] != '*' && str[i - 1] != '|' && str[i - 1] != '#' && str[i - 1] != '=' && str[i - 1] != '>' && str[i - 1] != '^' && str[i - 1] != '!' && str[i - 1] != '('))
-			return false;
-		if (str[i] == '(' && ((str[i - 1] >= 'A' && str[i - 1] <= 'Z' || str[i - 1] == '1' || str[i - 1] == '0')))
-			return false;
-		if ((!(str[i] >= 'A' && str[i] <= 'Z' || str[i] == '1' || str[i] == '0') && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i - 1] >= 'A' && str[i - 1] <= 'Z' || str[i - 1] == '1' || str[i - 1] == '0') && str[i - 1] != '(' && str[i - 1] != ')' && str[i - 1] != '!'))
-			return false;
-	}
-
-	for (int i = 0; i < str.length() - 1; i++) {
-		if ((str[i] >= 'A' && str[i] <= 'Z' || str[i] == '0' || str[i] == '1') && ((str[i + 1] != '+' && str[i + 1] != '|' && str[i + 1] != '*' && str[i + 1] != '#' && str[i + 1] != '=' && str[i + 1] != '>' && str[i + 1] != '^' && str[i + 1] != ')'))) {
-			return false;
-		}
-		if (str[i] == '(' && (!(str[i + 1] >= 'A' && str[i + 1] <= 'Z' || str[i + 1] == '0' || str[i + 1] == '1') && str[i + 1] != '!' && str[i + 1] != '(')) {
-			return false;
-		}
-
-		if ((!(str[i] >= 'A' && str[i] <= 'Z' || str[i] == '1' || str[i] == '0') && str[i] != '(' && str[i] != ')' && str[i] != '!') && (!(str[i + 1] >= 'A' && str[i + 1] <= 'Z' || str[i + 1] == '1' || str[i + 1] == '0') && str[i + 1] != '(' && str[i + 1] != ')' && str[i + 1] != '!')) {
-			return false;
-		}
-	}
-
-	return true;
 }
 
 std::string Boolean::zhegalkin(std::string str) {
@@ -839,119 +916,99 @@ std::string Boolean::zhegalkin(std::string str) {
 
 }
 
-bool Boolean::is_x(std::string str) {
-	if (str.find("x0") == -1)
-		return false;
+std::vector<std::string> Boolean::gray_code(int size) {
 
-	return true;
+	// Построение кода Грея для создания порядка двоичных кодов с единичным расстоянием Хэмминга
+	// Construction of a Gray code to create an order of binary codes with a one Hamming distance
+
+	std::vector <std::string> gray;
+
+	gray.push_back("0");
+	gray.push_back("1");
+
+	for (int i = 2; i < (1 << size); i = i << 1) {
+
+		for (int j = i - 1; j >= 0; j--)
+			gray.push_back(gray[j]);
+
+		for (int j = 0; j < i; j++)
+			gray[j] = "0" + gray[j];
+
+		for (int j = i; j < 2 * i; j++)
+			gray[j] = "1" + gray[j];
+	}
+
+	return gray;
+
 }
 
-std::string Boolean::fix_input(std::string str) {
+std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string str) {
 
-	// Remove ' ' from str
-	// Исключение ' ' из str
+	// Building a karnaugh map using Gray's code.
+	// Построение карты Карно с помощью кода Грея.
 
-	for (int i = 0; i < str.length(); i++) {
-		if (str[i] == ' ') {
-			str.erase(str.begin() + i);
-			i = 0;
+	std::vector <std::vector<bool>> table = truth_table(str);
+
+	int y_size = check_order(str).size() / 2;
+	int x_size = check_order(str).size() - y_size;
+
+	std::vector <std::vector<std::string>> table_karnaugh(pow(2, x_size) + 1);
+
+	std::vector <std::string> x_gray = gray_code(x_size);
+
+	std::vector <std::string> y_gray = gray_code(y_size);
+
+	for (int i = 0; i < pow(2, x_size) + 1; i++)
+		table_karnaugh[i].resize(pow(2, y_size) + 1);
+
+	for (int i = 0; i < table_karnaugh.size() - 1; i++)
+		table_karnaugh[i + 1][0] = x_gray[i];
+
+	for (int i = 0; i < table_karnaugh[0].size() - 1; i++) {
+		table_karnaugh[0][i + 1] = y_gray[i];
+	}
+
+	for (int i = check_order(str).size() / 2; i < check_order(str).size(); i++)
+		table_karnaugh[0][0].push_back(check_order(str)[i]);
+
+	table_karnaugh[0][0].push_back('\\');
+
+	for (int i = 0; i < check_order(str).size() / 2; i++)
+		table_karnaugh[0][0].push_back(check_order(str)[i]);
+
+	std::string temp;
+	int pos_in_truth = 0;
+
+	for (int i = 1; i < table_karnaugh.size(); i++) {
+		for (int j = 1; j < table_karnaugh[0].size(); j++) {
+
+			temp = temp + table_karnaugh[0][j];
+
+			temp = temp + table_karnaugh[i][0];
+
+			for (int k = 0; k < temp.size(); k++) {
+				pos_in_truth = pos_in_truth + (temp[k] - '0') * pow(2, temp.size() - k - 1);
+			}
+
+			if (table[pos_in_truth][table[0].size() - 1] == 0)
+				table_karnaugh[i][j] = '0';
+			else
+				table_karnaugh[i][j] = '1';
+
+			temp = "";
+			pos_in_truth = 0;
 		}
 	}
 
-	for (int i = 0; i < str.length() - 1; i++) {
-		if (str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] >= 'A' && str[i + 1] <= 'Z') {
-			str.insert(str.begin() + i + 1, '*');
-			i = 0;
-		}
-	}
-
-	int sort = 0;
-	int max = -1;
-
-	// Conversion from x0 in A, x1 in B and etc...
-	// Преобразование из x0 в A, x1 в B и т.д.
-
-	if (!is_x(str))
-		return str;
-
-	str.push_back(' ');
-
-	for (int i = 0; i < str.length(); i++) {
-
-		if (str[i] >= '0' && str[i] <= '9') {
-			sort = str[i] - '0';
-		}
-		if (str[i] >= '0' && str[i] <= '9' && str[i + 1] >= '0' && str[i + 1] <= '9') {
-			sort = (str[i] - '0') * 10 + str[i + 1] - '0';
-		}
-
-		if (sort > max)
-			max = sort;
-	}
-
-	std::string temp = "";
-
-	for (int i = max; i >= 0; i--) {
-
-		temp.push_back('A' + i);
-
-		str = std::regex_replace(str, std::regex("x" + std::to_string(i)), temp);
-
-		temp.pop_back();
-
-	}
-
-	str.pop_back();
-
-	// Fixing AB in A*B
-	// Исправление AB в A*B
-
-	for (int i = 0; i < str.length() - 1; i++) {
-		if (str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] >= 'A' && str[i + 1] <= 'Z') {
-			str.insert(str.begin() + i + 1, '*');
-			i = 0;
-		}
-	}
-
-	return str;
+	return table_karnaugh;
 }
 
-std::string Boolean::fix_output(std::string str) {
 
-	// Conversion from A in x0, B in x1 and etc...
-	// Преобразование из A в x0, B в x1 и т.д.
-
-	int sort = 0;
-	int max = -1;
-
-	for (int i = 0; i < str.length(); i++) {
-		if (str[i] >= 'A' && str[i] <= 'Z') {
-			sort = str[i] - 'A';
-		}
-
-		if (sort > max)
-			max = sort;
-	}
-
-	std::string temp = "";
-
-	for (int i = max; i >= 0; i--) {
-
-		temp.push_back('A' + i);
-
-		str = std::regex_replace(str, std::regex(temp), "x" + std::to_string(i));
-
-		temp.pop_back();
-
-	}
-
-	return str;
-
-}
 // Visible method.
 // Видимые методы.
 
 std::string Boolean::polynom(const std::string str) {
+
 	// Creating the Zhegalkin polynomial by the triangle method
 	// Создание полинома Жегалкина методом треугольника
 
@@ -974,12 +1031,12 @@ std::string Boolean::polynom(const std::string str) {
 
 std::string Boolean::simplify(const std::string str) {
 
+	// Return simplified expression
+	// Возврат упрощенного выражения 
+
 	std::string input = str;
 
 	input = fix_input(input);
-
-	// Return simplified expression
-	// Возврат упрощенного выражения 
 
 	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
@@ -994,32 +1051,14 @@ std::string Boolean::simplify(const std::string str) {
 		return fix_output(simplifing(sort_table(build_simply_table(input, check_order(input))), check_order(input), input));
 }
 
-std::vector <std::vector<bool>> Boolean::truth_table(const std::string str) {
-
-	std::string input = str;
-
-	input = fix_input(input);
-
-	// Return the truth table in the vector type
-	// Возврат таблицы истинности в типе vector
-
-	if (!checking_expression(input))
-		throw std::exception("Error in the expression");
-
-	// Error in the expression
-	// Ошибка в выражении
-
-	return Boolean::build_table(input, Boolean::check_order(input));
-}
-
 std::vector <bool> Boolean::result(const std::string str) {
-
-	std::string input = str;
-
-	input = fix_input(input);
 
 	// Return only result of logical expression
 	// Возврат только результата логического выражения
+
+	std::string input = str;
+
+	input = fix_input(input);
 
 	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
@@ -1035,6 +1074,40 @@ std::vector <bool> Boolean::result(const std::string str) {
 		table_result.push_back(table[i][table[1].size() - 1]);
 
 	return table_result;
+}
+
+std::vector <std::vector<bool>> Boolean::truth_table(const std::string str) {
+
+	// Return the truth table in the vector type
+	// Возврат таблицы истинности в типе vector
+
+	std::string input = str;
+
+	input = fix_input(input);
+
+	if (!checking_expression(input)) {
+		throw std::exception("Error in the expression");
+	}
+
+	// Error in the expression
+	// Ошибка в выражении
+
+	return Boolean::build_table(input, Boolean::check_order(input));
+}
+
+std::vector <std::vector<std::string>> Boolean::karnaugh(const std::string str) {
+
+	// Создание карты Карно
+	// Creating a karnaugh Map
+
+	std::string input = str;
+
+	input = fix_input(input);
+
+	if (!checking_expression(input))
+		throw std::exception("Error in the expression");
+
+	return Boolean::build_karnaugh(input);
 }
 
 #endif;
