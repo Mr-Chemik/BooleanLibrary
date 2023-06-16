@@ -35,7 +35,7 @@ A simple C++ library that allows you to perform various methods for working with
 - **`Boolean::truth_table (string str)`** - Return of the truth table by boolean expression.
 - **`Boolean::result (string str)`** - Returns the result of a boolean expression table.
 - **`Boolean::polynom (string str)`** - Return of the Zhegalkin polynomial by a boolean expression.
-- **`Boolean::karnaugh(const std::string str)`** - Return of the Karnaugh map by a boolean expression.
+- **`Boolean::karnaugh (string str)`** - Return of the Karnaugh map by a boolean expression.
 
 ## Developers
 
