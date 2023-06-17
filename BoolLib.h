@@ -37,7 +37,7 @@ private:
 	static std::string zhegalkin(std::string str);
 
 	static std::vector <std::string> gray_code(int size);
-	static std::vector <std::vector<std::string>> build_karnaugh(std::string str);
+	static std::vector <std::vector<std::string>> build_karnaugh(std::string str, std::string other_order, std::string original_str);
 };
 
 
@@ -54,6 +54,8 @@ bool Boolean::is_x(std::string str) {
 
 std::string Boolean::fix_input(std::string str) {
 
+	std::string other_order = check_order(str);
+
 	// Remove ' ' from str
 	// Исключение ' ' из str
 
@@ -65,7 +67,7 @@ std::string Boolean::fix_input(std::string str) {
 	}
 
 	for (int i = 0; i < str.length() - 1; i++) {
-		if ((str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] >= 'A' && str[i + 1] <= 'Z') || (str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] == '!')) {
+		if ((str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] >= 'A' && str[i + 1] <= 'Z') || (str[i] >= 'A' && str[i] <= 'Z' && str[i + 1] == '!') || (str[i] >= '0' && str[i] <= '9' && str[i + 1] == 'x') || (str[i] >= '0' && str[i] <= '9' && str[i + 1] == '!')) {
 			str.insert(str.begin() + i + 1, '*');
 			i = 0;
 		}
@@ -77,8 +79,15 @@ std::string Boolean::fix_input(std::string str) {
 	// Conversion from x0 in A, x1 in B and etc...
 	// Преобразование из x0 в A, x1 в B и т.д.
 
-	if (!is_x(str))
+	if (!is_x(str)) {
+		for (int i = 0; i < other_order.length(); i++) {
+			for (int j = 0; j < str.length(); j++) {
+				if (str[j] == other_order[i])
+					str[j] = char(65 + i);
+			}
+		}
 		return str;
+	}
 
 	str.push_back(' ');
 
@@ -779,7 +788,7 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 				}
 			}
 
-			if (max_unic < unic) {
+			if (max_unic < unic && impl_matrix[i][0] <= impl_matrix[unic_y][0]) {
 				max_unic = unic;
 				unic_y = i;
 			}
@@ -794,6 +803,9 @@ std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::str
 		impl_matrix[unic_y][0] = "NULL";
 
 		full = true;
+
+		// Проверка целостности упрощенного выражения.
+		// Checking the integrity of a simplified expression.
 
 		for (int j = 1; j < MATRIX_X; j++) {
 			for (int i = 0; i < null_pos.size(); i++)
@@ -942,7 +954,7 @@ std::vector<std::string> Boolean::gray_code(int size) {
 
 }
 
-std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string str) {
+std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string str, std::string other_order, std::string original_str) {
 
 	// Building a karnaugh map using Gray's code.
 	// Построение карты Карно с помощью кода Грея.
@@ -976,6 +988,23 @@ std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string str) {
 	for (int i = 0; i < check_order(str).size() / 2; i++)
 		table_karnaugh[0][0].push_back(check_order(str)[i]);
 
+	if (is_x(original_str)) {
+		table_karnaugh[0][0] = fix_output(table_karnaugh[0][0]);
+	}
+	else {
+		for (int i = 0; i < other_order.length(); i++) {
+			for (int j = 0; j < table_karnaugh[0][0].length(); j++) {
+				if (table_karnaugh[0][0][j] == char(65 + i))
+					table_karnaugh[0][0][j] = char(other_order[i] + 32);
+			}
+		}
+
+		for (int i = 0; i < table_karnaugh[0][0].length(); i++) {
+			if (table_karnaugh[0][0][i] >= 'a' && table_karnaugh[0][0][i] <= 'z')
+				table_karnaugh[0][0][i] = char(table_karnaugh[0][0][i] - 32);
+		}
+	}
+
 	std::string temp;
 	int pos_in_truth = 0;
 
@@ -986,9 +1015,8 @@ std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string str) {
 
 			temp = temp + table_karnaugh[i][0];
 
-			for (int k = 0; k < temp.size(); k++) {
+			for (int k = 0; k < temp.size(); k++)
 				pos_in_truth = pos_in_truth + (temp[k] - '0') * pow(2, temp.size() - k - 1);
-			}
 
 			if (table[pos_in_truth][table[0].size() - 1] == 0)
 				table_karnaugh[i][j] = '0';
@@ -1003,7 +1031,6 @@ std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string str) {
 	return table_karnaugh;
 }
 
-
 // Visible method.
 // Видимые методы.
 
@@ -1013,6 +1040,7 @@ std::string Boolean::polynom(const std::string str) {
 	// Создание полинома Жегалкина методом треугольника
 
 	std::string input = str;
+	std::string other_order = check_order(str);
 
 	input = fix_input(input);
 
@@ -1022,10 +1050,28 @@ std::string Boolean::polynom(const std::string str) {
 	// Error in the expression
 	// Ошибка в выражении
 
-	if (!is_x(str))
-		return zhegalkin(input);
-	else
+	if (!is_x(str)) {
+
+		input = zhegalkin(input);
+
+		for (int i = 0; i < other_order.length(); i++) {
+			for (int j = 0; j < input.length(); j++) {
+				if (input[j] == char(65 + i))
+					input[j] = char(other_order[i] + 32);
+			}
+		}
+
+		for (int i = 0; i < input.length(); i++) {
+			if (input[i] >= 'a' && input[i] <= 'z')
+				input[i] = char(input[i] - 32);
+		}
+
+		return input;
+
+	}
+	else {
 		return fix_output(zhegalkin(input));
+	}
 
 }
 
@@ -1035,6 +1081,7 @@ std::string Boolean::simplify(const std::string str) {
 	// Возврат упрощенного выражения 
 
 	std::string input = str;
+	std::string other_order = check_order(str);
 
 	input = fix_input(input);
 
@@ -1044,11 +1091,26 @@ std::string Boolean::simplify(const std::string str) {
 	// Error in the expression
 	// Ошибка в выражении
 
-	if (!is_x(str))
-		return simplifing(sort_table(build_simply_table(input, check_order(input))), check_order(input), input);
+	if (!is_x(str)) {
+		input = simplifing(sort_table(build_simply_table(input, check_order(input))), check_order(input), input);
 
-	else
+		for (int i = 0; i < other_order.length(); i++) {
+			for (int j = 0; j < input.length(); j++) {
+				if (input[j] == char(65 + i))
+					input[j] = char(other_order[i] + 32);
+			}
+		}
+
+		for (int i = 0; i < input.length(); i++) {
+			if (input[i] >= 'a' && input[i] <= 'z')
+				input[i] = char(input[i] - 32);
+		}
+
+		return input;
+	}
+	else {
 		return fix_output(simplifing(sort_table(build_simply_table(input, check_order(input))), check_order(input), input));
+	}
 }
 
 std::vector <bool> Boolean::result(const std::string str) {
@@ -1057,6 +1119,7 @@ std::vector <bool> Boolean::result(const std::string str) {
 	// Возврат только результата логического выражения
 
 	std::string input = str;
+	std::string other_order = check_order(str);
 
 	input = fix_input(input);
 
@@ -1101,13 +1164,16 @@ std::vector <std::vector<std::string>> Boolean::karnaugh(const std::string str) 
 	// Creating a karnaugh Map
 
 	std::string input = str;
+	std::string other_order = check_order(str);
 
 	input = fix_input(input);
 
 	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
 
-	return Boolean::build_karnaugh(input);
+
+	return Boolean::build_karnaugh(input, other_order, str);
+	
 }
 
 #endif;
