@@ -21,23 +21,23 @@ private:
 #define MATRIX_Y pdnf_sorted_table.size() + 1
 
 	static bool is_x(std::string str);
-	static std::string fix_input(std::string str);
+	static std::string fix_input(std::string& str);
 	static std::string fix_output(std::string str);
-	static std::string check_order(std::string str);
-	static bool checking_expression(std::string str);
+	static std::string check_order(std::string& str);
+	static bool checking_expression(std::string& str);
 
 	static std::string solving_expression(std::string str);
-	static std::string searching_bracket(std::string str, std::vector <int> value);
+	static std::string searching_bracket(std::string str, std::vector <int>& value);
 	static std::vector <std::vector<bool>> build_table(std::string str, std::string sorting);
 
 	static std::vector <std::string> sort_table(std::vector <std::vector<std::string>> table);
-	static std::vector <std::vector<std::string>> build_simply_table(std::string str, std::string sorting);
+	static std::vector <std::vector<std::string>> build_simply_table(std::string& str, std::string sorting);
 	static std::string simplifing(std::vector <std::string> sorted_table, std::string sorting, std::string str);
 
-	static std::string zhegalkin(std::string str);
+	static std::string zhegalkin(std::string& str);
 
-	static std::vector <std::string> gray_code(int size);
-	static std::vector <std::vector<std::string>> build_karnaugh(std::string str, std::string other_order, std::string original_str);
+	static std::vector <std::string> gray_code(int& size);
+	static std::vector <std::vector<std::string>> build_karnaugh(std::string& str, std::string& other_order, std::string original_str);
 };
 
 
@@ -52,7 +52,7 @@ bool Boolean::is_x(std::string str) {
 	return true;
 }
 
-std::string Boolean::fix_input(std::string str) {
+std::string Boolean::fix_input(std::string& str) {
 
 	std::string other_order = check_order(str);
 
@@ -164,7 +164,7 @@ std::string Boolean::fix_output(std::string str) {
 
 }
 
-std::string Boolean::check_order(std::string str) {
+std::string Boolean::check_order(std::string& str) {
 
 	// Checking an expression for an alphabetical sequence.
 	// Проверка выражения на наличие алфавитной последовательности.
@@ -193,7 +193,7 @@ std::string Boolean::check_order(std::string str) {
 	return sorting;
 }
 
-bool Boolean::checking_expression(std::string str) {
+bool Boolean::checking_expression(std::string& str) {
 
 	// Checking correctness of expression
 	// Проверка выражения на корректность
@@ -456,7 +456,7 @@ std::string Boolean::solving_expression(std::string str) {
 	return str;
 }
 
-std::string Boolean::searching_bracket(std::string str, std::vector <int> value) {
+std::string Boolean::searching_bracket(std::string str, std::vector <int>& value) {
 
 	// Search for parentheses, and solve them.
 	// Поиск скобок, и их решение.
@@ -564,7 +564,7 @@ std::vector <std::vector<bool>> Boolean::build_table(std::string str, std::strin
 	return table;
 }
 
-std::vector <std::vector<std::string>> Boolean::build_simply_table(std::string str, std::string sorting) {
+std::vector <std::vector<std::string>> Boolean::build_simply_table(std::string& str, std::string sorting) {
 
 	// Building a truth table from string
 	// Построение таблицы истинности из string
@@ -853,7 +853,7 @@ std::vector <std::string> Boolean::sort_table(std::vector <std::vector<std::stri
 	return sorted_table;
 }
 
-std::string Boolean::zhegalkin(std::string str) {
+std::string Boolean::zhegalkin(std::string& str) {
 
 	// Creating the Zhegalkin polynomial by the triangle method
 	// Создание полинома Жегалкина методом треугольника
@@ -928,7 +928,7 @@ std::string Boolean::zhegalkin(std::string str) {
 
 }
 
-std::vector<std::string> Boolean::gray_code(int size) {
+std::vector<std::string> Boolean::gray_code(int& size) {
 
 	// Построение кода Грея для создания порядка двоичных кодов с единичным расстоянием Хэмминга
 	// Construction of a Gray code to create an order of binary codes with a one Hamming distance
@@ -954,7 +954,7 @@ std::vector<std::string> Boolean::gray_code(int size) {
 
 }
 
-std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string str, std::string other_order, std::string original_str) {
+std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string& str, std::string& other_order, std::string original_str) {
 
 	// Building a karnaugh map using Gray's code.
 	// Построение карты Карно с помощью кода Грея.
@@ -1040,7 +1040,7 @@ std::string Boolean::polynom(const std::string str) {
 	// Создание полинома Жегалкина методом треугольника
 
 	std::string input = str;
-	std::string other_order = check_order(str);
+	std::string other_order = check_order(input);
 
 	input = fix_input(input);
 
@@ -1081,7 +1081,7 @@ std::string Boolean::simplify(const std::string str) {
 	// Возврат упрощенного выражения 
 
 	std::string input = str;
-	std::string other_order = check_order(str);
+	std::string other_order = check_order(input);
 
 	input = fix_input(input);
 
@@ -1119,7 +1119,7 @@ std::vector <bool> Boolean::result(const std::string str) {
 	// Возврат только результата логического выражения
 
 	std::string input = str;
-	std::string other_order = check_order(str);
+	std::string other_order = check_order(input);
 
 	input = fix_input(input);
 
@@ -1164,7 +1164,7 @@ std::vector <std::vector<std::string>> Boolean::karnaugh(const std::string str) 
 	// Creating a karnaugh Map
 
 	std::string input = str;
-	std::string other_order = check_order(str);
+	std::string other_order = check_order(input);
 
 	input = fix_input(input);
 
