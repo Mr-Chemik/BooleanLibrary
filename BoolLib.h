@@ -10,6 +10,8 @@
 
 class Boolean {
 public:
+	static std::string pdnf(const std::string);
+	static std::string pcnf(const std::string);
 	static std::string polynom(const std::string);
 	static std::string simplify(const std::string str);
 	static std::vector <bool> result(const std::string str);
@@ -21,10 +23,11 @@ private:
 #define MATRIX_Y pdnf_sorted_table.size() + 1
 
 	static bool is_x(std::string str);
-	static std::string fix_input(std::string& str);
+	static void fix_input(std::string& str);
 	static std::string fix_output(std::string str);
 	static std::string check_order(std::string& str);
 	static bool checking_expression(std::string& str);
+	static void fix_order(std::string& str, std::string& other_order);
 
 	static std::string solving_expression(std::string str);
 	static std::string searching_bracket(std::string str, std::vector <int>& value);
@@ -32,14 +35,16 @@ private:
 
 	static std::vector <std::string> sort_table(std::vector <std::vector<std::string>> table);
 	static std::vector <std::vector<std::string>> build_simply_table(std::string& str, std::string sorting);
-	static std::string simplifing(std::vector <std::string> sorted_table, std::string sorting, std::string str);
+	static std::string simplifing(std::string str);
 
 	static std::string zhegalkin(std::string& str);
 
 	static std::vector <std::string> gray_code(int& size);
 	static std::vector <std::vector<std::string>> build_karnaugh(std::string& str, std::string& other_order, std::string original_str);
-};
 
+	static std::string make_dnf(std::string& str);
+	static std::string make_cnf(std::string& str);
+};
 
 bool Boolean::is_x(std::string str) {
 
@@ -52,7 +57,7 @@ bool Boolean::is_x(std::string str) {
 	return true;
 }
 
-std::string Boolean::fix_input(std::string& str) {
+void Boolean::fix_input(std::string& str) {
 
 	std::string other_order = check_order(str);
 
@@ -86,7 +91,7 @@ std::string Boolean::fix_input(std::string& str) {
 					str[j] = char(65 + i);
 			}
 		}
-		return str;
+		return (void)0;
 	}
 
 	str.push_back(' ');
@@ -127,8 +132,6 @@ std::string Boolean::fix_input(std::string& str) {
 			i = 0;
 		}
 	}
-
-	return str;
 }
 
 std::string Boolean::fix_output(std::string str) {
@@ -250,6 +253,21 @@ bool Boolean::checking_expression(std::string& str) {
 	}
 
 	return true;
+}
+
+void Boolean::fix_order(std::string& str, std::string& other_order) {
+
+	for (int i = 0; i < other_order.length(); i++) {
+		for (int j = 0; j < str.length(); j++) {
+			if (str[j] == char(65 + i))
+				str[j] = char(other_order[i] + 32);
+		}
+	}
+
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] >= 'a' && str[i] <= 'z')
+			str[i] = char(str[i] - 32);
+	}
 }
 
 std::string Boolean::solving_expression(std::string str) {
@@ -468,7 +486,7 @@ std::string Boolean::searching_bracket(std::string str, std::vector <int>& value
 	int start = 0;
 
 	for (int i = 0; i < str.length(); i++) {
-		if (str[i] >= 65 && str[i] <= 90) {
+		if (str[i] >= 'A' && str[i] <= 'Z') {
 			help = std::to_string(value[str[i] - 'A']);
 			str[i] = help[0];
 		}
@@ -526,9 +544,9 @@ std::vector <std::vector<bool>> Boolean::build_table(std::string str, std::strin
 	// Building a truth table by int
 	// Строит таблицу истинности из целочисленных переменных
 
-	int x;
-	int y;
-	int count;
+	int x = 0;
+	int y = 0;
+	int count = 0;
 
 	x = sorting.length();
 
@@ -569,10 +587,10 @@ std::vector <std::vector<std::string>> Boolean::build_simply_table(std::string& 
 	// Building a truth table from string
 	// Построение таблицы истинности из string
 
-	int x;
-	int y;
-	int count;
-	char current_symb;
+	int x = 0;
+	int y = 0;
+	int count = 0;
+	char current_symb = 0;
 	std::string exp = "";
 
 	x = sorting.length();
@@ -611,10 +629,14 @@ std::vector <std::vector<std::string>> Boolean::build_simply_table(std::string& 
 	return table;
 }
 
-std::string Boolean::simplifing(std::vector <std::string> sorted_table, std::string sorting, std::string str) {
+std::string Boolean::simplifing(std::string str) {
 
 	// Simplifying the expression Quine's method.
 	// Упрощение выражение методом Куайна
+
+	std::vector <std::string> sorted_table = sort_table(build_simply_table(str, check_order(str)));
+
+	std::string sorting = check_order(str);
 
 	int end = sorted_table.size();
 	int begin = 0;
@@ -1031,8 +1053,156 @@ std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string& str, 
 	return table_karnaugh;
 }
 
+std::string Boolean::make_dnf(std::string& str) {
+
+	// Creating a DNF based on sets when the function takes a positive value
+	// Создание ДНФ на основе наборов, когда функция принимает положительное значение
+
+	std::vector <std::vector<bool>> table = Boolean::truth_table(str);
+	
+	std::string new_str = "";
+
+	bool is_1 = false;
+
+	for (int i = 0; i < table.size(); i++) {
+
+		if (table[i][table[i].size() - 1] == 1) {
+
+			is_1 = true;
+
+			for (int j = 0; j < table[i].size() - 1; j++) {
+
+				if (table[i][j] == 0) {
+					new_str.push_back('!');
+					new_str.push_back(char(j + 'A'));
+				}
+				else {
+					new_str.push_back(char(j + 'A'));
+				}
+			}
+
+			new_str.push_back('+');
+
+		}
+
+	}
+
+	if (!is_1)
+		new_str = "0";
+
+	new_str.pop_back();
+
+	return new_str;
+}
+
+std::string Boolean::make_cnf(std::string& str) {
+
+	// Creating a CNF based on sets when the function takes a negative value
+	// Создание КНФ на основе наборов, когда функция принимает отрицательное значение
+
+	std::vector <std::vector<bool>> table = Boolean::truth_table(str);
+
+	std::string new_str = "";
+
+	bool is_0 = false;
+
+	for (int i = 0; i < table.size(); i++) {
+
+		if (table[i][table[i].size() - 1] == 0) {
+
+			is_0 = true;
+
+			new_str.push_back('(');
+
+			for (int j = 0; j < table[i].size() - 1; j++) {
+
+				if (table[i][j] == 0) {
+					new_str.push_back(char(j + 'A'));
+				}
+				else {
+					new_str.push_back('!');
+					new_str.push_back(char(j + 'A'));
+				}
+
+				new_str.push_back('+');
+
+			}
+
+			new_str.pop_back();
+
+			new_str.push_back(')');
+			new_str.push_back('*');
+		}
+
+	}
+
+	if (!is_0)
+		new_str = "0";
+
+	new_str.pop_back();
+
+	return new_str;
+
+}
+
 // Visible method.
 // Видимые методы.
+
+std::string Boolean::pdnf(const std::string str) {
+
+	// Creating a PDNF by expression
+	// Создание СДНФ по выражению
+
+	std::string input = str;
+	std::string other_order = check_order(input);
+
+	fix_input(input);
+
+
+	if (!checking_expression(input))
+		throw std::exception("Error in the expression");
+
+
+	if (!is_x(str)) {
+		input = make_dnf(input);
+
+		fix_order(input, other_order);
+
+		return input;
+	}
+	else {
+		return fix_output(make_dnf(input));
+	}
+
+}
+
+std::string Boolean::pcnf(const std::string str) {
+
+	// Creating a PCNF by expression
+	// Создание СКНФ по выражению
+
+	std::string input = str;
+	std::string other_order = check_order(input);
+
+	fix_input(input);
+
+
+	if (!checking_expression(input))
+		throw std::exception("Error in the expression");
+
+
+	if (!is_x(str)) {
+		input = make_cnf(input);
+
+		fix_order(input, other_order);
+
+		return input;
+	}
+	else {
+		return fix_output(make_cnf(input));
+	}
+
+}
 
 std::string Boolean::polynom(const std::string str) {
 
@@ -1042,7 +1212,7 @@ std::string Boolean::polynom(const std::string str) {
 	std::string input = str;
 	std::string other_order = check_order(input);
 
-	input = fix_input(input);
+	fix_input(input);
 
 	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
@@ -1054,17 +1224,7 @@ std::string Boolean::polynom(const std::string str) {
 
 		input = zhegalkin(input);
 
-		for (int i = 0; i < other_order.length(); i++) {
-			for (int j = 0; j < input.length(); j++) {
-				if (input[j] == char(65 + i))
-					input[j] = char(other_order[i] + 32);
-			}
-		}
-
-		for (int i = 0; i < input.length(); i++) {
-			if (input[i] >= 'a' && input[i] <= 'z')
-				input[i] = char(input[i] - 32);
-		}
+		fix_order(input, other_order);
 
 		return input;
 
@@ -1077,13 +1237,13 @@ std::string Boolean::polynom(const std::string str) {
 
 std::string Boolean::simplify(const std::string str) {
 
-	// Return simplified expression
-	// Возврат упрощенного выражения 
+	// Return simplified DNF expression
+	// Возврат упрощенного ДНФ выражения 
 
 	std::string input = str;
 	std::string other_order = check_order(input);
 
-	input = fix_input(input);
+	fix_input(input);
 
 	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
@@ -1092,24 +1252,14 @@ std::string Boolean::simplify(const std::string str) {
 	// Ошибка в выражении
 
 	if (!is_x(str)) {
-		input = simplifing(sort_table(build_simply_table(input, check_order(input))), check_order(input), input);
+		input = simplifing(input);
 
-		for (int i = 0; i < other_order.length(); i++) {
-			for (int j = 0; j < input.length(); j++) {
-				if (input[j] == char(65 + i))
-					input[j] = char(other_order[i] + 32);
-			}
-		}
-
-		for (int i = 0; i < input.length(); i++) {
-			if (input[i] >= 'a' && input[i] <= 'z')
-				input[i] = char(input[i] - 32);
-		}
+		fix_order(input, other_order);
 
 		return input;
 	}
 	else {
-		return fix_output(simplifing(sort_table(build_simply_table(input, check_order(input))), check_order(input), input));
+		return fix_output(simplifing(input));
 	}
 }
 
@@ -1121,7 +1271,7 @@ std::vector <bool> Boolean::result(const std::string str) {
 	std::string input = str;
 	std::string other_order = check_order(input);
 
-	input = fix_input(input);
+	fix_input(input);
 
 	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
@@ -1131,10 +1281,10 @@ std::vector <bool> Boolean::result(const std::string str) {
 
 	std::vector <std::vector<bool>> table = Boolean::truth_table(input);
 
-	std::vector <bool> table_result;
+	std::vector <bool> table_result(table.size());
 
 	for (int i = 0; i < table.size(); i++)
-		table_result.push_back(table[i][table[1].size() - 1]);
+		table_result[i] = table[i][table[1].size() - 1];
 
 	return table_result;
 }
@@ -1146,11 +1296,10 @@ std::vector <std::vector<bool>> Boolean::truth_table(const std::string str) {
 
 	std::string input = str;
 
-	input = fix_input(input);
+	fix_input(input);
 
-	if (!checking_expression(input)) {
+	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
-	}
 
 	// Error in the expression
 	// Ошибка в выражении
@@ -1166,7 +1315,7 @@ std::vector <std::vector<std::string>> Boolean::karnaugh(const std::string str) 
 	std::string input = str;
 	std::string other_order = check_order(input);
 
-	input = fix_input(input);
+	fix_input(input);
 
 	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
