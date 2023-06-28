@@ -5,10 +5,10 @@
 
 int main() {
 
-	std::string input = "(0*A+!B^D)>(A*!C+D)";
+	std::string input = "(A+Z)>(N=!D)";
 
 	std::vector <std::vector<bool>> table = Boolean::truth_table(input);
-	std::cout << "Truth table: " << '\n' << "A B C D F" << '\n';
+	std::cout << "Truth table: " << '\n' << "A D N Z F" << '\n';
 
 	for (int i = 0; i < table.size(); i++) {
 		for (int j = 0; j < table[0].size(); j++)
@@ -43,10 +43,15 @@ int main() {
 
 
 	std::cout << '\n' << "Simplify: " << Boolean::simplify(input) << '\n';
-	// Return simplified expression
+	// Return simplified DNF expression
 
 
 	std::cout << '\n' << "Zhegalkin polynomial: " << Boolean::polynom(input) << '\n';
 	// Return Zhegalkin polynomial
 
+	std::cout << '\n' << "PDNF: " << Boolean::pdnf(input) << '\n';
+	// Return DNF
+
+	std::cout << '\n' << "PCNF: " << Boolean::pcnf(input) << '\n';
+	// Return CNF
 }
