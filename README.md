@@ -39,6 +39,8 @@ A simple C++ library that allows you to perform various methods for working with
 - **`Boolean::result (string str)`** - Returns the result of a boolean expression table.
 - **`Boolean::polynom (string str)`** - Return of the Zhegalkin polynomial by a boolean expression.
 - **`Boolean::karnaugh (string str)`** - Return of the Karnaugh map by a boolean expression.
+- **`Boolean::pdnf (string str)`** - Return of a pdnf expression.
+- **`Boolean::pcnf (string str)`** - Return of a pcnf expression.
 
 ## Developers
 
