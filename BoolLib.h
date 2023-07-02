@@ -23,6 +23,7 @@ private:
 #define MATRIX_Y pdnf_sorted_table.size() + 1
 
 	static bool is_x(std::string str);
+	static bool is_vec(std::string& str);
 	static void fix_input(std::string& str);
 	static std::string fix_output(std::string str);
 	static std::string check_order(std::string& str);
@@ -55,6 +56,25 @@ bool Boolean::is_x(std::string str) {
 		return false;
 
 	return true;
+}
+
+bool Boolean::is_vec(std::string& str) {
+
+	int count = 0;
+
+	for (int i = 0; i < str.size(); i++) {
+		if (str[i] == '0' || str[i] == '1')
+			count++;
+	}
+
+	if (count == str.size()) {
+		if ((log2(str.size()) - int(log2(str.size())) == 0))
+			return true;
+		else
+			return false;
+	}
+
+	return false;
 }
 
 void Boolean::fix_input(std::string& str) {
@@ -174,19 +194,25 @@ std::string Boolean::check_order(std::string& str) {
 
 	std::string sorting;
 
-	for (int i = 0; i < str.length(); i++) {
-		if (str[i] >= 'A' && str[i] <= 'Z') {
-			if (sorting.length() == 0) {
-				sorting = str[i];
-				continue;
-			}
-			for (int j = 0; j < sorting.length(); j++) {
-				if (str[i] == sorting[j])
-					break;
+	if (is_vec(str)) {
+		for (int i = 0; i < log2(str.size()); i++)
+			sorting.push_back(char('A' + i));
+	}
+	else {
+		for (int i = 0; i < str.length(); i++) {
+			if (str[i] >= 'A' && str[i] <= 'Z') {
+				if (sorting.length() == 0) {
+					sorting = str[i];
+					continue;
+				}
+				for (int j = 0; j < sorting.length(); j++) {
+					if (str[i] == sorting[j])
+						break;
 
-				if (j == sorting.length() - 1)
-					sorting = sorting + str[i];
+					if (j == sorting.length() - 1)
+						sorting = sorting + str[i];
 
+				}
 			}
 		}
 	}
@@ -204,6 +230,20 @@ bool Boolean::checking_expression(std::string& str) {
 	int count = 0;
 
 	std::string sort_str = Boolean::check_order(str);
+
+	for (int i = 0; i < str.size(); i++) {
+		if (str[i] == '0' || str[i] == '1')
+			count++;
+	}
+
+	if (count == str.size()) {
+		if ((log2(str.size()) - int(log2(str.size())) == 0))
+			return true;
+		else
+			return false;
+	}
+
+	count = 0;
 
 	for (int i = 0; i < sort_str.length() - 1; i++) {
 		if (sort_str[i] + 1 != sort_str[i + 1])
@@ -548,9 +588,9 @@ std::vector <std::vector<bool>> Boolean::build_table(std::string str, std::strin
 	int y = 0;
 	int count = 0;
 
-	x = sorting.length();
+	x = is_vec(str) ? log2(str.length()) : sorting.length();
 
-	y = pow(2, x);
+	y = is_vec(str) ? str.length() : pow(2, x);
 
 	std::vector <int> value(x);
 
@@ -576,7 +616,8 @@ std::vector <std::vector<bool>> Boolean::build_table(std::string str, std::strin
 		}
 		// "Sending" the values of the truth table fields for the solution
 		// "Отправка" значений полей таблицы истинности для решения
-		table[i][x - 1] = atoi(searching_bracket(str, value).c_str());
+
+		table[i][x - 1] = is_vec(str) ? bool(str[i] - '0') : (atoi(searching_bracket(str, value).c_str()));
 	}
 
 	return table;
@@ -593,9 +634,9 @@ std::vector <std::vector<std::string>> Boolean::build_simply_table(std::string& 
 	char current_symb = 0;
 	std::string exp = "";
 
-	x = sorting.length();
+	x = is_vec(str) ? log2(str.length()) : sorting.length();
 
-	y = pow(2, x);
+	y = is_vec(str) ? str.length() : pow(2, x);
 
 
 	std::vector <int> value(x);
@@ -622,7 +663,9 @@ std::vector <std::vector<std::string>> Boolean::build_simply_table(std::string& 
 		}
 		std::reverse(exp.begin(), exp.end());
 		table[i][0] = exp;
-		table[i][1] = Boolean::searching_bracket(str, value);
+		
+		table[i][1] = is_vec(str) ? std::to_string(str[i] - '0') : (Boolean::searching_bracket(str, value));
+		
 		exp = "";
 	}
 
@@ -638,11 +681,14 @@ std::string Boolean::simplifing(std::string str) {
 
 	std::string sorting = check_order(str);
 
+
 	int end = sorted_table.size();
 	int begin = 0;
 	int unic = 0;
 	int unic_y = 0;
+	int max_unic = 0;
 	int last_end = 0;
+	bool full = true;
 
 	std::string first_str = "";
 	std::string second_str;
@@ -784,12 +830,25 @@ std::string Boolean::simplifing(std::string str) {
 		}
 	}
 
-	int max_unic = -1;
+	max_unic = -1;
 
-	bool full = false;
+	unic = 0;
+	unic_y = 0;
+
+	full = true;
 
 	// Filling the expression with additional terms that close the maximum number of matrix cells.
 	// Заполнение выражения дополнительными членами, которые закрывают максимальное количество ячеек матрицы.
+
+	for (int j = 1; j < MATRIX_X; j++) {
+		for (int i = 0; i < null_pos.size(); i++)
+			unic = unic + (impl_matrix[null_pos[i]][j][0] - '0');
+
+		if (unic == 0)
+			full = false;
+
+		unic = 0;
+	}
 
 	while (!full) {
 
@@ -810,20 +869,20 @@ std::string Boolean::simplifing(std::string str) {
 				}
 			}
 
-			if (max_unic < unic && impl_matrix[i][0] <= impl_matrix[unic_y][0]) {
+			if (max_unic < unic) {
 				max_unic = unic;
 				unic_y = i;
 			}
 
 		}
 
-		null_pos.push_back(unic_y);
-
-		if(impl_matrix[unic_y][0] != "NULL")
+		if (impl_matrix[unic_y][0] != "NULL") {
+			null_pos.push_back(unic_y);
 			first_str = first_str + impl_matrix[unic_y][0] + "+";
+			impl_matrix[unic_y][0] = "NULL";
+		}
 
-		impl_matrix[unic_y][0] = "NULL";
-
+		unic = 0;
 		full = true;
 
 		// Проверка целостности упрощенного выражения.
@@ -844,7 +903,6 @@ std::string Boolean::simplifing(std::string str) {
 	// Transformation of expression into a normal form.
 	// Трансофрмация выражения в нормальную форму.
 
-
 	for (int i = 0; i < first_str.length(); i++) {
 		if (first_str[i] >= 'a') {
 			combo = (first_str[i] - 32);
@@ -853,7 +911,7 @@ std::string Boolean::simplifing(std::string str) {
 		}
 	}
 
-	first_str.erase(first_str.length() - 1);
+	first_str.pop_back();
 
 	return first_str;
 }
@@ -880,7 +938,19 @@ std::string Boolean::zhegalkin(std::string& str) {
 	// Creating the Zhegalkin polynomial by the triangle method
 	// Создание полинома Жегалкина методом треугольника
 
-	std::vector <bool> res = Boolean::result(str);
+	std::vector <bool> res;
+	std::vector <std::vector<bool>> table = Boolean::build_table(str, check_order(str));;
+
+	if (is_vec(str)) {
+		res.resize(str.length());
+
+		for (int i = 0; i < str.length(); i++)
+			res[i] = bool(str[i] - '0');
+	}
+
+	else {
+		res = Boolean::result(str);
+	}
 
 	int size_of_result = res.size();
 
@@ -901,9 +971,6 @@ std::string Boolean::zhegalkin(std::string& str) {
 			triangle[i + 1][j] = triangle[i][j] xor triangle[i][j + 1];
 		}
 	}
-
-
-	std::vector <std::vector<bool>> table = Boolean::build_table(str, check_order(str));
 
 	for (int i = 0; i < table.size(); i++) {
 		table[i][table[i].size() - 1] = triangle[i][0];
@@ -1058,8 +1125,8 @@ std::string Boolean::make_dnf(std::string& str) {
 	// Creating a DNF based on sets when the function takes a positive value
 	// Создание ДНФ на основе наборов, когда функция принимает положительное значение
 
-	std::vector <std::vector<bool>> table = Boolean::truth_table(str);
-	
+	std::vector <std::vector<bool>> table = Boolean::truth_table(str);;
+
 	std::string new_str = "";
 
 	bool is_1 = false;
@@ -1157,7 +1224,6 @@ std::string Boolean::pdnf(const std::string str) {
 	std::string other_order = check_order(input);
 
 	fix_input(input);
-
 
 	if (!checking_expression(input))
 		throw std::exception("Error in the expression");
