@@ -18,6 +18,7 @@ A simple C++ library that allows you to perform various methods for working with
 - All unique (used at least once) variables must be in uppercase (A, D, J...) or as variables can be: x0, x1, x2...
 - Expression with non-strict alphabetical order will be solved in the usual alphabetical order (E+V=F will be solved as: A+C=B).
 - Non-standard logical operations (all except NOT, AND, OR) have no priority over each other and are solved in order.
+- Vector input is possible using values of dimension n^2 ("01001100").
 - It is possible to use logical constants 0 and 1.
 - **`()`** - Parenthesis for prioritizing operations.
 
