@@ -33,6 +33,9 @@ A simple C++ library that allows you to perform various methods for working with
 - **`|`** - NAND
 - **`#`** - NOR
 
+### Class:
+- **`Boolean::Post`** - A class containing the classification of the Post by function. .
+
 ### Methods:
 
 - **`Boolean::simlplify (string str)`** - Return of a simplified boolean expression.
@@ -42,6 +45,14 @@ A simple C++ library that allows you to perform various methods for working with
 - **`Boolean::karnaugh (string str)`** - Return of the Karnaugh map by a boolean expression.
 - **`Boolean::pdnf (string str)`** - Return of a pdnf expression.
 - **`Boolean::pcnf (string str)`** - Return of a pcnf expression.
+
+### Post's Methods:
+
+- **`Boolean::Post::get_T1()`** - Returns belonging to the T1 class
+- **`Boolean::Post::get_T2()`** - Returns belonging to the T2 class
+- **`Boolean::Post::get_M()`** - Returns belonging to the M class
+- **`Boolean::Post::get_L()`** - Returns belonging to the L class
+- **`Boolean::Post::get_S()`** - Returns belonging to the S class
 
 ## Developers
 
