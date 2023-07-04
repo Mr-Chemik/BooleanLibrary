@@ -48,8 +48,8 @@ A simple C++ library that allows you to perform various methods for working with
 
 ### Post's Methods:
 
-- **`Boolean::Post::get_T1()`** - Returns belonging to the T1 class
-- **`Boolean::Post::get_T2()`** - Returns belonging to the T2 class
+- **`Boolean::Post::get_T1()`** - Returns belonging to the T0 class
+- **`Boolean::Post::get_T2()`** - Returns belonging to the T1 class
 - **`Boolean::Post::get_M()`** - Returns belonging to the M class
 - **`Boolean::Post::get_L()`** - Returns belonging to the L class
 - **`Boolean::Post::get_S()`** - Returns belonging to the S class
