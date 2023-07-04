@@ -34,7 +34,7 @@ A simple C++ library that allows you to perform various methods for working with
 - **`#`** - NOR
 
 ### Class:
-- **`Boolean::Post`** - A class containing the classification of the Post by function. .
+- **`Boolean::Post`** - A class containing the classification of the Post by function.
 
 ### Methods:
 
