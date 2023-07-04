@@ -1212,6 +1212,7 @@ std::string Boolean::make_cnf(std::string& str) {
 }
 
 // Post's classification
+// Классификация Поста
 
 class Boolean::Post {
 
