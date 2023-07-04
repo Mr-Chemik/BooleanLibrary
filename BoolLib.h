@@ -18,9 +18,15 @@ public:
 	static std::vector <std::vector<bool>> truth_table(const std::string str);
 	static std::vector <std::vector<std::string>> karnaugh(const std::string str);
 
+	class Post;
+
 private:
+
 #define MATRIX_X sorted_table.size() / 2 + 1
 #define MATRIX_Y pdnf_sorted_table.size() + 1
+
+#define TABLE_X table[0].size()
+#define TABLE_Y table.size()
 
 	static bool is_x(std::string str);
 	static bool is_vec(std::string& str);
@@ -45,6 +51,7 @@ private:
 
 	static std::string make_dnf(std::string& str);
 	static std::string make_cnf(std::string& str);
+
 };
 
 bool Boolean::is_x(std::string str) {
@@ -663,9 +670,9 @@ std::vector <std::vector<std::string>> Boolean::build_simply_table(std::string& 
 		}
 		std::reverse(exp.begin(), exp.end());
 		table[i][0] = exp;
-		
+
 		table[i][1] = is_vec(str) ? std::to_string(str[i] - '0') : (Boolean::searching_bracket(str, value));
-		
+
 		exp = "";
 	}
 
@@ -691,9 +698,9 @@ std::string Boolean::simplifing(std::string str) {
 	bool full = true;
 
 	std::string first_str = "";
-	std::string second_str;
-	std::string first_compare;
-	std::string second_compare;
+	std::string second_str = "";
+	std::string first_compare = "";
+	std::string second_compare = "";
 	std::string combo = "";
 
 
@@ -745,8 +752,9 @@ std::string Boolean::simplifing(std::string str) {
 			}
 
 			for (int n = 0; n < simplify_sorted_table.size(); n++) {
-				if (combo == simplify_sorted_table[n])
+				if (combo == simplify_sorted_table[n]) {
 					combo = "";
+				}
 			}
 
 			if (combo.length() >= first_str.length() - 1 && first_str.length() != 1) {
@@ -830,12 +838,10 @@ std::string Boolean::simplifing(std::string str) {
 		}
 	}
 
-	max_unic = -1;
-
 	unic = 0;
 	unic_y = 0;
-
 	full = true;
+	max_unic = -1;
 
 	// Filling the expression with additional terms that close the maximum number of matrix cells.
 	// Заполнение выражения дополнительными членами, которые закрывают максимальное количество ячеек матрицы.
@@ -843,21 +849,17 @@ std::string Boolean::simplifing(std::string str) {
 	for (int j = 1; j < MATRIX_X; j++) {
 		for (int i = 0; i < null_pos.size(); i++)
 			unic = unic + (impl_matrix[null_pos[i]][j][0] - '0');
-
 		if (unic == 0)
 			full = false;
 
 		unic = 0;
 	}
-
 	while (!full) {
 
 		max_unic = -1;
 
 		for (int i = 1; i < MATRIX_Y; i++) {
-
 			unic = 0;
-
 			for (int j = 1; j < MATRIX_X; j++) {
 				for (int k = 0; k < null_pos.size(); k++) {
 
@@ -868,14 +870,11 @@ std::string Boolean::simplifing(std::string str) {
 						unic++;
 				}
 			}
-
 			if (max_unic < unic) {
 				max_unic = unic;
 				unic_y = i;
 			}
-
 		}
-
 		if (impl_matrix[unic_y][0] != "NULL") {
 			null_pos.push_back(unic_y);
 			first_str = first_str + impl_matrix[unic_y][0] + "+";
@@ -892,7 +891,7 @@ std::string Boolean::simplifing(std::string str) {
 			for (int i = 0; i < null_pos.size(); i++)
 				unic = unic + (impl_matrix[null_pos[i]][j][0] - '0');
 
-			if (unic == 0) 
+			if (unic == 0)
 				full = false;
 
 			unic = 0;
@@ -923,7 +922,7 @@ std::vector <std::string> Boolean::sort_table(std::vector <std::vector<std::stri
 
 	std::vector<std::string> sorted_table(0);
 
-	for (int i = 0; i < table.size(); i++) {
+	for (int i = 0; i < TABLE_Y; i++) {
 		if (table[i][1] == "1") {
 			sorted_table.push_back(table[i][0]);
 			sorted_table.push_back("0");
@@ -972,8 +971,8 @@ std::string Boolean::zhegalkin(std::string& str) {
 		}
 	}
 
-	for (int i = 0; i < table.size(); i++) {
-		table[i][table[i].size() - 1] = triangle[i][0];
+	for (int i = 0; i < TABLE_Y; i++) {
+		table[i][TABLE_X - 1] = triangle[i][0];
 	}
 
 	for (int i = 0; i < size_of_result; i++)
@@ -987,17 +986,17 @@ std::string Boolean::zhegalkin(std::string& str) {
 
 	std::string pol = "";
 
-	for (int i = 0; i < table.size(); i++) {
+	for (int i = 0; i < TABLE_Y; i++) {
 
 
-		for (int j = 0; j < table[i].size() - 1; j++) {
+		for (int j = 0; j < TABLE_X - 1; j++) {
 
-			if (i == 0 && table[i][table[i].size() - 1] == 1) {
+			if (i == 0 && table[i][TABLE_X - 1] == 1) {
 				pol = pol + "1";
 				break;
 			}
 
-			if (table[i][table[i].size() - 1] == 1) {
+			if (table[i][TABLE_X - 1] == 1) {
 
 				if (table[i][j] == 1)
 					pol = pol + char('A' + j);
@@ -1005,12 +1004,12 @@ std::string Boolean::zhegalkin(std::string& str) {
 
 		}
 
-		if (table[i][table[i].size() - 1] == 1)
+		if (table[i][TABLE_X - 1] == 1)
 			pol = pol + '^';
 
 	}
 
-	if(pol.size() > 0)
+	if (pol.size() > 0)
 		pol.pop_back();
 
 	return pol;
@@ -1107,7 +1106,7 @@ std::vector<std::vector<std::string>> Boolean::build_karnaugh(std::string& str, 
 			for (int k = 0; k < temp.size(); k++)
 				pos_in_truth = pos_in_truth + (temp[k] - '0') * pow(2, temp.size() - k - 1);
 
-			if (table[pos_in_truth][table[0].size() - 1] == 0)
+			if (table[pos_in_truth][TABLE_X - 1] == 0)
 				table_karnaugh[i][j] = '0';
 			else
 				table_karnaugh[i][j] = '1';
@@ -1131,13 +1130,13 @@ std::string Boolean::make_dnf(std::string& str) {
 
 	bool is_1 = false;
 
-	for (int i = 0; i < table.size(); i++) {
+	for (int i = 0; i < TABLE_Y; i++) {
 
-		if (table[i][table[i].size() - 1] == 1) {
+		if (table[i][TABLE_X - 1] == 1) {
 
 			is_1 = true;
 
-			for (int j = 0; j < table[i].size() - 1; j++) {
+			for (int j = 0; j < TABLE_X - 1; j++) {
 
 				if (table[i][j] == 0) {
 					new_str.push_back('!');
@@ -1173,15 +1172,15 @@ std::string Boolean::make_cnf(std::string& str) {
 
 	bool is_0 = false;
 
-	for (int i = 0; i < table.size(); i++) {
+	for (int i = 0; i < TABLE_Y; i++) {
 
-		if (table[i][table[i].size() - 1] == 0) {
+		if (table[i][TABLE_X - 1] == 0) {
 
 			is_0 = true;
 
 			new_str.push_back('(');
 
-			for (int j = 0; j < table[i].size() - 1; j++) {
+			for (int j = 0; j < TABLE_X - 1; j++) {
 
 				if (table[i][j] == 0) {
 					new_str.push_back(char(j + 'A'));
@@ -1210,6 +1209,136 @@ std::string Boolean::make_cnf(std::string& str) {
 
 	return new_str;
 
+}
+
+// Post's classification
+
+class Boolean::Post {
+
+public:
+
+	Post();
+
+	Post(std::string);
+
+	bool get_T1();
+	bool get_T2();
+	bool get_M();
+	bool get_L();
+	bool get_S();
+
+private:
+	bool T1;
+	bool T2;
+	bool M;
+	bool L;
+	bool S;
+
+};
+
+Boolean::Post::Post() {
+	T1 = 0;
+	T2 = 0;
+	L = 0;
+	M = 0;
+	S = 0;
+}
+
+Boolean::Post::Post(std::string str) : Post() {
+
+	std::vector <std::vector<bool>> table = Boolean::truth_table(str);
+
+	std::string pol = Boolean::polynom(str);
+
+	// T1
+
+	if (table[0][TABLE_X - 1] == 0)
+		T1 = true;
+
+	// T2
+
+	if (table[TABLE_Y - 1][TABLE_X - 1] == 1)
+		T2 = true;
+
+	// L
+
+	if (pol.size() == 1)
+		L = true;
+
+	for (int i = 0; i < pol.size() - 1; i++) {
+		if (((pol[i] >= '0' && pol[i] <= '9') && pol[i + 1] == 'x') || ((pol[i] >= 'A' && pol[i] <= 'Z') && (pol[i + 1] >= 'A' && pol[i + 1] <= 'Z')))
+			break;
+
+		if (i == pol.size() - 2)
+			L = true;
+	}
+
+	// M
+
+	bool pareto = false;
+	bool exit = false;
+
+	for (int i = 0; i < TABLE_Y; i++) {
+		for (int k = 0; k < TABLE_Y; k++) {
+
+			if (i == k)
+				continue;
+
+			for (int j = 0; j < TABLE_X - 1; j++) {
+
+				if (table[i][j] > table[k][j])
+					break;
+
+				if (j == TABLE_X - 2)
+					pareto = true;
+			}
+
+			if (pareto && table[i][TABLE_X - 1] > table[k][TABLE_X - 1]) {
+				exit = true;
+				break;
+			}
+
+			pareto = false;
+
+		}
+
+		if (exit)
+			break;
+
+		if (i == TABLE_Y - 1)
+			M = true;
+	}
+
+	// S
+
+	for (int i = 0; i < TABLE_Y / 2; i++) {
+		if (table[i][TABLE_X - 1] == table[TABLE_Y - 1 - i][TABLE_X - 1])
+			break;
+
+		if (i == TABLE_Y / 2 - 1)
+			S = true;
+	}
+
+}
+
+bool Boolean::Post::get_T1() {
+	return T1;
+}
+
+bool Boolean::Post::get_T2() {
+	return T2;
+}
+
+bool Boolean::Post::get_M() {
+	return M;
+}
+
+bool Boolean::Post::get_L() {
+	return L;
+}
+
+bool Boolean::Post::get_S() {
+	return S;
 }
 
 // Visible method.
@@ -1347,9 +1476,9 @@ std::vector <bool> Boolean::result(const std::string str) {
 
 	std::vector <std::vector<bool>> table = Boolean::truth_table(input);
 
-	std::vector <bool> table_result(table.size());
+	std::vector <bool> table_result(TABLE_Y);
 
-	for (int i = 0; i < table.size(); i++)
+	for (int i = 0; i < TABLE_Y; i++)
 		table_result[i] = table[i][table[1].size() - 1];
 
 	return table_result;
@@ -1388,7 +1517,7 @@ std::vector <std::vector<std::string>> Boolean::karnaugh(const std::string str) 
 
 
 	return Boolean::build_karnaugh(input, other_order, str);
-	
+
 }
 
 #endif;
