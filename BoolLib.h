@@ -1222,15 +1222,15 @@ public:
 
 	Post(std::string);
 
+	bool get_T0();
 	bool get_T1();
-	bool get_T2();
 	bool get_M();
 	bool get_L();
 	bool get_S();
 
 private:
+	bool T0;
 	bool T1;
-	bool T2;
 	bool M;
 	bool L;
 	bool S;
@@ -1238,8 +1238,8 @@ private:
 };
 
 Boolean::Post::Post() {
+	T0 = 0;
 	T1 = 0;
-	T2 = 0;
 	L = 0;
 	M = 0;
 	S = 0;
@@ -1251,15 +1251,15 @@ Boolean::Post::Post(std::string str) : Post() {
 
 	std::string pol = Boolean::polynom(str);
 
-	// T1
+	// T0
 
 	if (table[0][TABLE_X - 1] == 0)
-		T1 = true;
+		T0 = true;
 
-	// T2
+	// T1
 
 	if (table[TABLE_Y - 1][TABLE_X - 1] == 1)
-		T2 = true;
+		T1 = true;
 
 	// L
 
@@ -1322,12 +1322,12 @@ Boolean::Post::Post(std::string str) : Post() {
 
 }
 
-bool Boolean::Post::get_T1() {
-	return T1;
+bool Boolean::Post::get_T0() {
+	return T0;
 }
 
-bool Boolean::Post::get_T2() {
-	return T2;
+bool Boolean::Post::get_T1() {
+	return T1;
 }
 
 bool Boolean::Post::get_M() {
