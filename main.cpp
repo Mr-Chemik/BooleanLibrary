@@ -56,6 +56,6 @@ int main() {
 	// Return CNF
 
 	Boolean::Post cl(input);
-	std::cout << '\n' << "T1:" << cl.get_T1() << " T2:" << cl.get_T2() << " M:" << cl.get_M() << " L:" << cl.get_L() << " S:" << cl.get_S();
+	std::cout << '\n' << "T0:" << cl.get_T0() << " T1:" << cl.get_T1() << " M:" << cl.get_M() << " L:" << cl.get_L() << " S:" << cl.get_S();
 	// Return Post's Classification
 }
