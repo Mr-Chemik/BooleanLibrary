@@ -5,9 +5,11 @@
 
 int main() {
 
-	std::string input = "(A+Z)>(N=!D)";
+	
+	std::string input = "(A^!Z)>!(D*Z+N)";
 
 	std::vector <std::vector<bool>> table = Boolean::truth_table(input);
+
 	std::cout << "Truth table: " << '\n' << "A D N Z F" << '\n';
 
 	for (int i = 0; i < table.size(); i++) {
@@ -16,7 +18,6 @@ int main() {
 		std::cout << '\n';
 	}
 	// Return the truth table in the vector type
-
 
 	std::vector <std::vector<std::string>> karnaugh_map = Boolean::karnaugh(input);
 	std::cout << '\n' << "Karnaugh map: " << '\n';
@@ -39,12 +40,11 @@ int main() {
 
 		std::cout << '\n';
 	}
-	// Return the karnaugh map in the vector type
 
+	// Return the karnaugh map in the vector type
 
 	std::cout << '\n' << "Simplify: " << Boolean::simplify(input) << '\n';
 	// Return simplified DNF expression
-
 
 	std::cout << '\n' << "Zhegalkin polynomial: " << Boolean::polynom(input) << '\n';
 	// Return Zhegalkin polynomial
@@ -54,4 +54,8 @@ int main() {
 
 	std::cout << '\n' << "PCNF: " << Boolean::pcnf(input) << '\n';
 	// Return CNF
+
+	Boolean::Post cl(input);
+	std::cout << '\n' << "T1:" << cl.get_T1() << " T2:" << cl.get_T2() << " M:" << cl.get_M() << " L:" << cl.get_L() << " S:" << cl.get_S();
+	// Return Post's Classification
 }
