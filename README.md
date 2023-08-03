@@ -56,4 +56,4 @@ A simple C++ library that allows you to perform various methods for working with
 
 ## Developers
 
-- [Gordei Piterin](https://github.com/ynasl)
+- [Gordei](https://github.com/ynasl)
